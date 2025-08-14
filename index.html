@@ -195,20 +195,15 @@
                         <div id="adminDashboardContainer" class="hidden-view">
                             <h1 class="text-3xl font-bold mb-6">لوحة المعلومات الشاملة (الأمين العام)</h1>
                             
-                            <!-- [MODIFIED] Top Row KPIs (Simplified) -->
                             <div id="kpiContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                 <!-- Top 2 KPIs will be injected here by JS -->
                             </div>
 
-                            <!-- [NEW] Main Content Grid -->
                             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
 
-                                <!-- [MODIFIED] Center Column: Servants List (Enlarged) -->
                                 <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col">
-                                    <div class="flex justify-between items-center mb-4">
-                                        <h2 class="text-xl font-bold">قائمة كل الخدام</h2>
-                                    </div>
-                                    <div class="relative flex-grow mb-4">
+                                    <h2 class="text-xl font-bold mb-4">قائمة كل الخدام</h2>
+                                    <div class="relative mb-4">
                                         <input type="text" id="adminSearchInput" placeholder="ابحث بالاسم أو الموبايل..." class="w-full p-3 pr-10 rounded-lg bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 focus:border-cyan-500 focus:outline-none">
                                         <i class="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                                     </div>
@@ -226,27 +221,30 @@
                                     </div>
                                 </div>
 
-                                <!-- [NEW] Right Column: Info Panels -->
                                 <div class="lg:col-span-1 space-y-6">
-                                    <!-- Follow-up Panel -->
+                                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col" style="height: 55vh;">
+                                        <h2 class="text-xl font-bold mb-2 text-cyan-600 dark:text-cyan-400">متابعة تسجيل الحضور</h2>
+                                        <div id="attendanceFollowUpPanel" class="flex-grow flex flex-col overflow-hidden">
+                                            <!-- Content injected by JS will go here -->
+                                        </div>
+                                    </div>
+
                                     <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col">
                                         <h2 class="text-xl font-bold mb-4">خدام بحاجة للمتابعة</h2>
-                                        <div id="followUpPanel" class="overflow-y-auto flex-grow space-y-2" style="max-height: 35vh;">
+                                        <div id="followUpPanel" class="overflow-y-auto flex-grow space-y-2" style="max-height: 20vh;">
                                             <!-- Follow-up list will be injected here -->
                                         </div>
                                     </div>
 
-                                    <!-- Birthdays Panel -->
                                     <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col">
                                         <h2 class="text-xl font-bold mb-4">أعياد ميلاد قادمة (30 يوم)</h2>
-                                        <div id="birthdaysPanel" class="overflow-y-auto flex-grow space-y-2" style="max-height: 35vh;">
+                                        <div id="birthdaysPanel" class="overflow-y-auto flex-grow space-y-2" style="max-height: 20vh;">
                                             <!-- Birthdays list will be injected here -->
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- [MODIFIED] Bottom Row: Chart and Announcements -->
                             <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-6">
                                 <div class="lg:col-span-3 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
                                     <h2 class="text-xl font-bold mb-4">متوسط الحضور العام (آخر 30 يوم)</h2>
@@ -1693,7 +1691,7 @@
 
             if (isGeneralSecretaryMode) {
                 renderAdminServantsTable(allServantsCache);
-                updateAdminDashboard(); // [MODIFIED] Call the new dashboard renderer
+                updateAdminDashboard();
                 
                 const thirtyDaysAgo = new Date();
                 thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -2082,12 +2080,29 @@
         // --- NEW/MODIFIED FUNCTIONS FOR SECRETARY GENERAL ---
         // ==================================================================
 
+        function getLastFriday() {
+            const today = new Date();
+            const dayOfWeek = today.getDay(); // Sunday = 0, Friday = 5
+            const daysToSubtract = (dayOfWeek + 2) % 7; 
+            const lastFriday = new Date(today);
+            lastFriday.setDate(today.getDate() - daysToSubtract);
+            lastFriday.setHours(0, 0, 0, 0);
+            
+            const y = lastFriday.getFullYear();
+            const m = String(lastFriday.getMonth() + 1).padStart(2, '0');
+            const d = String(lastFriday.getDate()).padStart(2, '0');
+            
+            return {
+                date: lastFriday,
+                dateString: `${y}-${m}-${d}`
+            };
+        }
+
         function populateAnnouncementTargetSelector() {
             const container = document.getElementById('announcementTarget');
             if (!container) return;
             container.innerHTML = ''; // Clear previous content
 
-            // Add "Select All" checkbox
             container.innerHTML += `
                 <div class="flex items-center p-1">
                     <input id="announcement-target-all" type="checkbox" value="all" class="w-4 h-4 text-cyan-600 bg-gray-100 border-gray-300 rounded focus:ring-cyan-500 ml-2 cursor-pointer">
@@ -2108,7 +2123,6 @@
                 `;
             });
 
-            // Add event listener for "Select All"
             const allCheckbox = container.querySelector('#announcement-target-all');
             const serviceCheckboxes = container.querySelectorAll('.service-target-checkbox');
             allCheckbox.addEventListener('change', (e) => {
@@ -2230,18 +2244,13 @@
             }
         }
 
-        /**
-         * [NEW] Renders the main KPI cards at the top of the admin dashboard.
-         */
         function renderAdminKPIs() {
             const kpiContainer = DOMElements.kpiContainer;
             kpiContainer.innerHTML = '';
             kpiContainer.className = 'grid grid-cols-1 sm:grid-cols-2 gap-6';
 
-            // KPI 1: Total Servants
             kpiContainer.innerHTML += createKpiCard('users', 'إجمالي الخدام', allServantsCache.length, 'خادم في جميع الخدمات', 'bg-blue-100 dark:bg-blue-800', 'text-blue-600');
 
-            // KPI 2: Top Service this month
             const serviceAttendance = {};
             const today = new Date();
             const currentMonth = today.getMonth();
@@ -2274,16 +2283,12 @@
             kpiContainer.innerHTML += createKpiCard('star', 'الخدمة الأعلى حضوراً', topService.name, `${topService.avg.toFixed(1)}% هذا الشهر`, 'bg-green-100 dark:bg-green-800', 'text-green-600');
         }
 
-        /**
-         * [NEW] Renders the "Servants Needing Follow-up" panel.
-         */
         function renderFollowUpPanel(servantAttendanceSummary) {
             const container = DOMElements.followUpPanel;
             if (!container) return;
 
             const needsFollowUp = Object.values(servantAttendanceSummary)
                 .map(s => ({ ...s, percentage: s.possible > 0 ? (s.attended / s.possible) * 100 : 0 }))
-                // [FIXED] Changed condition from > 8 to > 4
                 .filter(s => s.possible > 4 && s.percentage < 50)
                 .sort((a, b) => a.percentage - b.percentage);
 
@@ -2303,9 +2308,6 @@
             `).join('');
         }
 
-        /**
-         * [NEW] Renders the "Upcoming Birthdays" panel for all services.
-         */
         function renderBirthdaysPanel() {
             const container = DOMElements.birthdaysPanel;
             if (!container) return;
@@ -2328,15 +2330,80 @@
             `).join('');
         }
 
-        /**
-         * [MODIFIED] This is the new main renderer for the admin dashboard.
-         */
+        function renderAttendanceFollowUpPanel() {
+            const container = DOMElements.attendanceFollowUpPanel;
+            if (!container) return;
+
+            const { date, dateString } = getLastFriday();
+            const formattedDate = date.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long' });
+            
+            const legendHTML = `
+                <div class="flex-shrink-0">
+                    <p class="text-sm text-gray-500 mb-2">آخر جمعة: ${formattedDate}</p>
+                    <div class="mb-3 pb-3 border-b border-gray-200 dark:border-gray-700">
+                        <p class="text-xs font-bold mb-1 text-center">ترتيب الأنشطة (من اليمين لليسار):</p>
+                        <div class="text-xs text-gray-600 dark:text-gray-400 text-center leading-tight">
+                            ${activities.map(act => act.name).join(' - ')}
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 text-xs text-center mt-2">
+                            <div><span class="w-3 h-3 bg-green-500 rounded-full inline-block mr-1"></span> مسجل</div>
+                            <div><span class="w-3 h-3 bg-yellow-400 rounded-full inline-block mr-1"></span> ملغى</div>
+                            <div><span class="w-3 h-3 bg-red-500 rounded-full inline-block mr-1"></span> لم يسجل</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const servicesToCheck = services.filter(s => s.name !== 'الامين العام');
+            let allActivitiesComplete = true;
+
+            const serviceListHTML = servicesToCheck.map(service => {
+                const serviceName = service.name;
+                const attendanceRecord = allAttendanceCache.find(rec => rec.date === dateString && rec.serviceName === serviceName);
+                
+                let hasMissingActivities = false;
+                const dotsHTML = activities.map(act => {
+                    const activityData = attendanceRecord ? attendanceRecord[act.key] : undefined;
+                    if (activityData) {
+                        if (activityData.note !== null && activityData.note !== undefined) {
+                            return '<span class="w-3 h-3 bg-yellow-400 rounded-full" title="ملغى"></span>';
+                        }
+                        return '<span class="w-3 h-3 bg-green-500 rounded-full" title="مسجل"></span>';
+                    } else {
+                        hasMissingActivities = true;
+                        allActivitiesComplete = false;
+                        return '<span class="w-3 h-3 bg-red-500 rounded-full" title="لم يسجل"></span>';
+                    }
+                }).join('');
+
+                return `
+                    <div class="p-2.5 rounded-lg flex justify-between items-center ${hasMissingActivities ? 'bg-red-100 dark:bg-red-900/50' : 'bg-gray-100 dark:bg-gray-700/50'}">
+                        <p class="font-semibold text-sm">${serviceName}</p>
+                        <div class="flex items-center gap-1.5">${dotsHTML}</div>
+                    </div>
+                `;
+            }).join('');
+            
+            let contentHTML = '';
+            if (allActivitiesComplete) {
+                 contentHTML = `
+                    <div class="p-3 rounded-lg bg-green-100 dark:bg-green-900/50 text-center flex-grow flex items-center justify-center">
+                        <div>
+                           <i class="fas fa-check-circle text-green-500 text-2xl mb-2"></i>
+                           <p class="font-semibold text-sm text-green-700 dark:text-green-300">ممتاز! جميع الأنشطة مسجلة لآخر جمعة.</p>
+                        </div>
+                    </div>`;
+            } else {
+                 contentHTML = `<div class="overflow-y-auto flex-grow space-y-2">${serviceListHTML}</div>`;
+            }
+
+            container.innerHTML = legendHTML + contentHTML;
+        }
+
         function updateAdminDashboard() {
-            // --- Calculations (can be done once) ---
             const servantAttendanceSummary = {};
             allServantsCache.forEach(s => servantAttendanceSummary[s.id] = { attended: 0, possible: 0, name: s.name, service: s.serviceName });
             
-            // [FIXED] Changed from 6 months to 3 months
             const lastThreeMonths = new Date();
             lastThreeMonths.setMonth(lastThreeMonths.getMonth() - 3);
             
@@ -2357,6 +2424,7 @@
 
             // --- Render Components ---
             renderAdminKPIs();
+            renderAttendanceFollowUpPanel();
             renderFollowUpPanel(servantAttendanceSummary);
             renderBirthdaysPanel();
         }
@@ -2379,7 +2447,6 @@
             const servant = allServantsCache.find(s => s.id === servantId);
             if (!servant) return;
 
-            // --- Attendance Breakdown Calculation ---
             const activityBreakdown = {};
             activities.forEach(act => activityBreakdown[act.key] = { attended: 0, possible: 0 });
 
@@ -2411,7 +2478,6 @@
                 `;
             }
 
-            // --- Profile Body HTML ---
             const val = (data) => data || 'غير متوفر';
             const body = `
                 <div class="flex flex-col md:flex-row gap-8">
@@ -2446,7 +2512,6 @@
             DOMElements.unifiedProfileModalBody.innerHTML = body;
             openModal(DOMElements.unifiedProfileModal);
             
-            // --- [NEW] Generate Profile Chart ---
             generateProfileAttendanceChart(servantId, servant.serviceName);
         }
         
@@ -2454,7 +2519,6 @@
             const monthlyData = {};
             const monthLabels = [];
             
-            // Initialize last 6 months
             for (let i = 5; i >= 0; i--) {
                 const d = new Date();
                 d.setMonth(d.getMonth() - i);
@@ -2650,9 +2714,9 @@
                 comparisonServiceSelector1: document.getElementById('comparisonServiceSelector1'),
                 comparisonServiceSelector2: document.getElementById('comparisonServiceSelector2'),
                 generateComparisonBtn: document.getElementById('generateComparisonBtn'),
-                // [NEW] Add new panel IDs to cache
                 followUpPanel: document.getElementById('followUpPanel'),
                 birthdaysPanel: document.getElementById('birthdaysPanel'),
+                attendanceFollowUpPanel: document.getElementById('attendanceFollowUpPanel'),
             };
 
             initializeFirebase();
