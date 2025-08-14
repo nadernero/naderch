@@ -21,56 +21,35 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
     <style>
-        /* IMPROVEMENT: Using CSS Variables for easier theming */
         :root {
-            --color-primary: #06b6d4;
-            --color-primary-dark: #0891b2;
-            --color-primary-darker: #0e7490;
-            --color-primary-light: #ccfbf1;
-            --color-primary-text: #115e59;
+            --color-primary: #06b6d4; /* cyan-500 */
+            --color-primary-dark: #0891b2; /* cyan-600 */
+            --color-primary-darker: #0e7490; /* cyan-700 */
+            --color-primary-light: #ccfbf1; /* cyan-100 */
+            --color-primary-text: #115e59; /* cyan-900 */
         }
-
         body { 
             font-family: 'Cairo', sans-serif; 
-            background-color: #f8fafc;
-            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d1d5db' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-        }
-        .dark body {
-            background-color: #0f172a;
-            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23334155' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            background-color: #f8fafc; /* gray-50 */
         }
         .modal-backdrop { background-color: rgba(0, 0, 0, 0.6); }
         .hidden-view { display: none !important; }
-        #mainDashboard.hidden-view { display: none !important; }
         .sidebar-link { transition: all 0.2s ease-in-out; }
         .sidebar-link.active { 
             background-color: var(--color-primary);
             color: white; 
             border-right: 4px solid var(--color-primary-darker);
         }
-        .sidebar-link:hover {
+        .sidebar-link:not(.active):hover {
             background-color: var(--color-primary-light);
             color: var(--color-primary-text);
-        }
-        .dark .sidebar-link.active {
-             background-color: var(--color-primary-darker);
-        }
-        .dark .sidebar-link:hover {
-            background-color: #134e4a; /* teal-900 */
-            color: var(--color-primary-light);
-        }
-        .activity-btn.active, .friday-btn.active {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            border: 2px solid var(--color-primary-darker);
+            transform: translateX(-4px);
         }
         .report-tab.active {
             border-color: var(--color-primary);
             background-color: var(--color-primary);
             color: white;
         }
-        input[type="date"]:required:invalid::-webkit-datetime-edit { color: transparent; }
-        input[type="date"]:focus::-webkit-datetime-edit { color: black !important; }
         .loader {
             border: 5px solid #f3f3f3;
             border-top: 5px solid var(--color-primary);
@@ -90,6 +69,15 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #a0a0a0; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #777; }
+        
+        #profileAttendanceChart {
+            max-height: 200px;
+        }
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
@@ -105,7 +93,8 @@
         <div class="container mx-auto px-4 py-8 md:py-12">
             <header class="text-center mb-10">
                 <h1 class="text-3xl md:text-4xl font-bold text-blue-800 dark:text-blue-400">نظام إدارة خدمة ابتدائي</h1>
-                <p class="mt-2 text-lg text-gray-600 dark:text-gray-400">اختر الخدمة التي تريد الدخول إليها</p>
+                <h2 class="text-xl md:text-2xl font-bold text-red-800 dark:text-red-400 mt-2">كنيسة مار بولس بالعبور</h2>
+                <p class="mt-4 text-lg text-gray-600 dark:text-gray-400">اختر الخدمة التي تريدها</p>
             </header>
             <main id="servicesGrid" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
                 <!-- Service Cards populated by JS -->
@@ -130,7 +119,7 @@
                 </div>
                 <div class="p-4 border-t dark:border-gray-700 space-y-2">
                     <button id="backToServices" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300 flex items-center justify-center">
-                        <i class="fas fa-arrow-right-from-bracket ml-2"></i> العودة للخدمات
+                        <i class="fas fa-arrow-right-from-bracket mr-2"></i> العودة للخدمات
                     </button>
                     <button id="logoutBtn" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300">تسجيل الخروج</button>
                 </div>
@@ -152,6 +141,8 @@
                         <!-- Service-specific Dashboard -->
                         <div id="serviceDashboardContainer">
                              <h1 class="text-3xl font-bold mb-6">لوحة معلومات الخدمة</h1>
+                             <!-- Announcements Section for Regular Services -->
+                            <div id="announcementsDisplay" class="mb-6"></div>
                              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                                 <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex items-center gap-4">
                                     <i class="fas fa-users text-4xl text-cyan-500"></i>
@@ -185,8 +176,8 @@
                                     <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
                                         <h2 class="text-xl font-bold mb-4">إجراءات سريعة</h2>
                                         <div class="space-y-3">
-                                            <button id="quickAddServant" class="w-full text-left p-3 rounded-lg bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 hover:bg-green-200 dark:hover:bg-green-800 transition-colors"><i class="fas fa-user-plus w-6 ml-2"></i> إضافة خادم جديد</button>
-                                            <button id="quickGoToAttendance" class="w-full text-left p-3 rounded-lg bg-cyan-100 dark:bg-cyan-900 text-cyan-800 dark:text-cyan-200 hover:bg-cyan-200 dark:hover:bg-cyan-800 transition-colors"><i class="fas fa-check-square w-6 ml-2"></i> تسجيل الحضور</button>
+                                            <button id="quickAddServant" class="w-full text-left p-3 rounded-lg bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 hover:bg-green-200 dark:hover:bg-green-800 transition-colors"><i class="fas fa-user-plus w-6 mr-2"></i> إضافة خادم جديد</button>
+                                            <button id="quickGoToAttendance" class="w-full text-left p-3 rounded-lg bg-cyan-100 dark:bg-cyan-900 text-cyan-800 dark:text-cyan-200 hover:bg-cyan-200 dark:hover:bg-cyan-800 transition-colors"><i class="fas fa-check-square w-6 mr-2"></i> تسجيل الحضور</button>
                                         </div>
                                     </div>
                                     <div id="backupRestoreSection" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
@@ -200,37 +191,30 @@
                             </div>
                         </div>
 
-                        <!-- Admin-specific Dashboard -->
+                        <!-- Admin-specific Dashboard (Secretary General) -->
                         <div id="adminDashboardContainer" class="hidden-view">
                             <h1 class="text-3xl font-bold mb-6">لوحة المعلومات الشاملة (الأمين العام)</h1>
-                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                <!-- Left Column: Stats and Chart -->
-                                <div class="lg:col-span-1 space-y-6">
-                                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex items-center gap-4">
-                                        <i class="fas fa-users text-4xl text-cyan-500"></i>
-                                        <div>
-                                            <p class="text-gray-500 dark:text-gray-400 text-sm">إجمالي الخدام (كل الخدمات)</p>
-                                            <p id="adminTotalServantsStat" class="text-3xl font-bold">0</p>
-                                        </div>
+                            
+                            <!-- [MODIFIED] Top Row KPIs (Simplified) -->
+                            <div id="kpiContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <!-- Top 2 KPIs will be injected here by JS -->
+                            </div>
+
+                            <!-- [NEW] Main Content Grid -->
+                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+
+                                <!-- [MODIFIED] Center Column: Servants List (Enlarged) -->
+                                <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <h2 class="text-xl font-bold">قائمة كل الخدام</h2>
                                     </div>
-                                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
-                                        <h2 class="text-xl font-bold mb-4">متوسط الحضور العام (آخر 30 يوم)</h2>
-                                        <div class="relative h-80">
-                                            <canvas id="adminAttendanceChart"></canvas>
-                                        </div>
+                                    <div class="relative flex-grow mb-4">
+                                        <input type="text" id="adminSearchInput" placeholder="ابحث بالاسم أو الموبايل..." class="w-full p-3 pr-10 rounded-lg bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 focus:border-cyan-500 focus:outline-none">
+                                        <i class="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                                     </div>
-                                </div>
-                                <!-- Right Column: All Servants Table -->
-                                <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
-                                     <div class="flex flex-col md:flex-row gap-4 mb-4">
-                                        <div class="relative flex-grow">
-                                            <input type="text" id="adminSearchInput" placeholder="ابحث بالاسم أو الموبايل..." class="w-full p-3 pr-10 rounded-lg bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 focus:border-cyan-500 focus:outline-none">
-                                            <i class="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                                        </div>
-                                    </div>
-                                    <div class="overflow-y-auto max-h-[500px]">
+                                    <div class="overflow-y-auto flex-grow" style="max-height: 70vh;">
                                         <table class="w-full text-right">
-                                            <thead class="bg-gray-50 dark:bg-gray-700 sticky top-0">
+                                            <thead class="bg-gray-50 dark:bg-gray-700 sticky top-0 z-10">
                                                 <tr>
                                                     <th class="p-3 font-bold">الاسم</th>
                                                     <th class="p-3 font-bold">الخدمة</th>
@@ -240,6 +224,43 @@
                                             <tbody id="adminServantsTableBody"></tbody>
                                         </table>
                                     </div>
+                                </div>
+
+                                <!-- [NEW] Right Column: Info Panels -->
+                                <div class="lg:col-span-1 space-y-6">
+                                    <!-- Follow-up Panel -->
+                                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col">
+                                        <h2 class="text-xl font-bold mb-4">خدام بحاجة للمتابعة</h2>
+                                        <div id="followUpPanel" class="overflow-y-auto flex-grow space-y-2" style="max-height: 35vh;">
+                                            <!-- Follow-up list will be injected here -->
+                                        </div>
+                                    </div>
+
+                                    <!-- Birthdays Panel -->
+                                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col">
+                                        <h2 class="text-xl font-bold mb-4">أعياد ميلاد قادمة (30 يوم)</h2>
+                                        <div id="birthdaysPanel" class="overflow-y-auto flex-grow space-y-2" style="max-height: 35vh;">
+                                            <!-- Birthdays list will be injected here -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- [MODIFIED] Bottom Row: Chart and Announcements -->
+                            <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-6">
+                                <div class="lg:col-span-3 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                                    <h2 class="text-xl font-bold mb-4">متوسط الحضور العام (آخر 30 يوم)</h2>
+                                    <div class="relative h-80"><canvas id="adminAttendanceChart"></canvas></div>
+                                </div>
+                                <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                                    <h2 class="text-xl font-bold mb-4">لوحة الإعلانات المركزية</h2>
+                                    <div id="adminAnnouncementsList" class="space-y-3 max-h-40 overflow-y-auto mb-4 pr-2"></div>
+                                    <textarea id="newAnnouncementInput" class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700" placeholder="اكتب إعلانك الجديد هنا..."></textarea>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mt-4">توجيه الإعلان إلى:</label>
+                                    <div id="announcementTarget" class="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 h-32 overflow-y-auto space-y-2">
+                                        <!-- Checkboxes will be populated by JS -->
+                                    </div>
+                                    <button id="addAnnouncementBtn" class="mt-3 w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-lg">إضافة إعلان</button>
                                 </div>
                             </div>
                         </div>
@@ -315,36 +336,61 @@
                                     <button data-report-type="individual" class="report-tab active flex-1 text-center py-2 px-4 border-b-2 font-medium text-lg transition-colors duration-300">تقرير فردي</button>
                                     <button data-report-type="comprehensive" class="report-tab flex-1 text-center py-2 px-4 border-b-2 font-medium text-lg transition-colors duration-300">تقرير شامل</button>
                                     <button data-report-type="averages" class="report-tab flex-1 text-center py-2 px-4 border-b-2 font-medium text-lg transition-colors duration-300">تقرير المتوسطات</button>
+                                    <button data-report-type="comparison" id="comparisonReportTab" class="report-tab flex-1 text-center py-2 px-4 border-b-2 font-medium text-lg transition-colors duration-300 hidden-view">مقارنة الخدمات</button>
                                 </div>
-                                <div id="reportFilters" class="space-y-4">
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-                                        <div id="serviceFilterContainer" class="hidden-view">
-                                            <label for="reportServiceSelector" class="block mb-2 font-bold text-sm">اختر الخدمة:</label>
-                                            <select id="reportServiceSelector" class="w-full p-3 h-14 text-lg border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></select>
+
+                                <!-- Container for standard reports -->
+                                <div id="standardReportsContainer">
+                                    <div id="reportFilters" class="space-y-4">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                                            <div id="serviceFilterContainer" class="hidden-view">
+                                                <label for="reportServiceSelector" class="block mb-2 font-bold text-sm">اختر الخدمة:</label>
+                                                <select id="reportServiceSelector" class="w-full p-3 h-14 text-lg border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></select>
+                                            </div>
+                                            <div id="servantSelectorContainer" class="md:col-span-2">
+                                                <label for="reportServantSelector" class="block mb-2 font-bold text-sm">اختر خادم:</label>
+                                                <select id="reportServantSelector" class="w-full p-3 h-14 text-lg border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></select>
+                                            </div>
+                                            <div>
+                                                <label for="reportStartDate" class="block mb-2 font-bold text-sm">من تاريخ:</label>
+                                                <input type="date" id="reportStartDate" class="w-full p-3 h-14 text-lg border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
+                                            </div>
+                                            <div>
+                                                <label for="reportEndDate" class="block mb-2 font-bold text-sm">إلى تاريخ:</label>
+                                                <input type="date" id="reportEndDate" class="w-full p-3 h-14 text-lg border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
+                                            </div>
                                         </div>
-                                        <div id="servantSelectorContainer" class="md:col-span-2">
-                                            <label for="reportServantSelector" class="block mb-2 font-bold text-sm">اختر خادم:</label>
-                                            <select id="reportServantSelector" class="w-full p-3 h-14 text-lg border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></select>
-                                        </div>
-                                        <div>
-                                            <label for="reportStartDate" class="block mb-2 font-bold text-sm">من تاريخ:</label>
-                                            <input type="date" id="reportStartDate" class="w-full p-3 h-14 text-lg border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-                                        </div>
-                                        <div>
-                                            <label for="reportEndDate" class="block mb-2 font-bold text-sm">إلى تاريخ:</label>
-                                            <input type="date" id="reportEndDate" class="w-full p-3 h-14 text-lg border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
+                                        <button id="generateReportBtn" class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-5 rounded-lg shadow-md transition-all">
+                                            <i class="fas fa-cogs mr-2"></i> إنشاء التقرير
+                                        </button>
+                                    </div>
+                                    <div id="reportOutput" class="hidden-view">
+                                        <div id="reportContent" class="my-6"></div>
+                                        <div id="exportButtons" class="flex justify-end gap-4 border-t pt-4">
+                                            <button id="exportPngBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg shadow-md transition-all"><i class="fas fa-file-image mr-2"></i> تصدير كصورة (PNG)</button>
+                                            <button id="exportPdfBtn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-5 rounded-lg shadow-md transition-all"><i class="fas fa-file-pdf mr-2"></i> تصدير كملف (PDF)</button>
                                         </div>
                                     </div>
-                                    <button id="generateReportBtn" class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-5 rounded-lg shadow-md transition-all">
-                                        <i class="fas fa-cogs mr-2"></i> إنشاء التقرير
-                                    </button>
                                 </div>
-                            </div>
-                            <div id="reportOutput" class="hidden-view">
-                                <div id="reportContent" class="my-6"></div>
-                                <div id="exportButtons" class="flex justify-end gap-4 border-t pt-4">
-                                    <button id="exportPngBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg shadow-md transition-all"><i class="fas fa-file-image mr-2"></i> تصدير كصورة (PNG)</button>
-                                    <button id="exportPdfBtn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-5 rounded-lg shadow-md transition-all"><i class="fas fa-file-pdf mr-2"></i> تصدير كملف (PDF)</button>
+                                
+                                <!-- Container for comparison report -->
+                                <div id="comparisonReportContainer" class="hidden-view mt-4">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                                        <div>
+                                            <label for="comparisonServiceSelector1" class="block mb-2 font-bold text-sm">الخدمة الأولى:</label>
+                                            <select id="comparisonServiceSelector1" class="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></select>
+                                        </div>
+                                        <div>
+                                            <label for="comparisonServiceSelector2" class="block mb-2 font-bold text-sm">الخدمة الثانية:</label>
+                                            <select id="comparisonServiceSelector2" class="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></select>
+                                        </div>
+                                    </div>
+                                    <button id="generateComparisonBtn" class="mt-4 w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-5 rounded-lg shadow-md transition-all">
+                                        <i class="fas fa-balance-scale mr-2"></i> مقارنة
+                                    </button>
+                                    <div class="mt-6">
+                                        <canvas id="comparisonChart"></canvas>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -418,12 +464,23 @@
             </div>
         </div>
     </div>
+    <div id="unifiedProfileModal" class="fixed inset-0 z-50 items-center justify-center hidden-view modal-backdrop">
+        <div class="bg-white dark:bg-gray-800 w-11/12 md:max-w-3xl mx-auto rounded-xl shadow-lg z-50 p-8 max-h-[90vh] overflow-y-auto">
+             <div class="flex justify-between items-center pb-3 border-b mb-4">
+                <h3 id="unifiedProfileModalTitle" class="text-2xl font-bold">الملف الشخصي الموحد</h3>
+                <button class="close-modal-btn cursor-pointer z-50 text-2xl" aria-label="إغلاق النافذة">&times;</button>
+            </div>
+            <div id="unifiedProfileModalBody">
+                <!-- Profile content will be injected here -->
+            </div>
+        </div>
+    </div>
     <div id="messageBox" class="hidden fixed top-5 right-5 text-white py-3 px-6 rounded-lg shadow-xl z-50"></div>
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, setDoc, getDoc, getDocs, updateDoc, query, where, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, setDoc, getDoc, getDocs, updateDoc, query, where, writeBatch, orderBy, serverTimestamp, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ==================================================================
         // FILE: config.js (Application Configuration)
@@ -461,7 +518,7 @@
 
         // --- GLOBAL STATE ---
         let currentServiceName = '';
-        let db, auth, userId, servantsUnsubscribe = null;
+        let db, auth, userId, servantsUnsubscribe = null, announcementsUnsubscribe = null;
         let servantsCache = [];
         let attendanceYearCache = {}; 
         let currentActivity = '';
@@ -472,11 +529,9 @@
         let allAttendanceCache = [];
         let isLocalMode = false;
         // Chart instances
-        let reportChart1 = null;
-        let reportChart2 = null;
-        let homeChart = null;
-        let adminChart = null;
-        // FIX: Auth Ready Promise
+        let reportChart1 = null, reportChart2 = null, homeChart = null;
+        let adminChart = null, comparisonChart = null, profileChart = null;
+        
         let authReadyPromiseResolver;
         const authReady = new Promise(resolve => {
             authReadyPromiseResolver = resolve;
@@ -543,11 +598,22 @@
                 isLocalMode = false;
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
+
+                try {
+                    await enableIndexedDbPersistence(db);
+                } catch (err) {
+                    if (err.code == 'failed-precondition') {
+                        console.warn('Firestore persistence failed: multiple tabs open.');
+                    } else if (err.code == 'unimplemented') {
+                        console.warn('Firestore persistence not available in this browser.');
+                    }
+                }
+
                 auth = getAuth(app);
                 onAuthStateChanged(auth, async (user) => {
                     if (user) {
                         userId = user.uid;
-                        authReadyPromiseResolver(); // Resolve the promise
+                        authReadyPromiseResolver(); 
                     } else {
                         try {
                            await signInAnonymously(auth);
@@ -588,10 +654,13 @@
             showLoading(true);
             if (isGeneralSecretaryMode) {
                 document.getElementById('sidebarServiceName').textContent = "عرض شامل (الامين العام)";
+                populateAnnouncementTargetSelector();
                 await loadAllServicesData();
-                switchPage('homePage'); // Start at dashboard for admin
+                listenForAnnouncements();
+                switchPage('homePage');
             } else {
                 await loadServants();
+                listenForAnnouncements();
                 switchPage('homePage');
             }
             showLoading(false);
@@ -603,6 +672,7 @@
             document.getElementById('sidebarServiceName').textContent = '';
             currentServiceName = '';
             if (servantsUnsubscribe) servantsUnsubscribe();
+            if (announcementsUnsubscribe) announcementsUnsubscribe();
             servantsCache = [];
             attendanceYearCache = {};
             isGeneralSecretaryMode = false;
@@ -1106,11 +1176,18 @@
             document.querySelectorAll('.report-tab').forEach(t => t.classList.remove('active'));
             document.querySelector('[data-report-type="individual"]').classList.add('active');
             currentReportType = 'individual';
+            
+            DOMElements.standardReportsContainer.classList.remove('hidden-view');
+            DOMElements.comparisonReportContainer.classList.add('hidden-view');
+
             DOMElements.servantSelectorContainer.classList.remove('hidden-view');
             
             DOMElements.serviceFilterContainer.classList.toggle('hidden-view', !isGeneralSecretaryMode);
+            DOMElements.comparisonReportTab.classList.toggle('hidden-view', !isGeneralSecretaryMode);
+
             if (isGeneralSecretaryMode) {
                 populateServiceFilter();
+                populateComparisonSelectors();
                  if(allServantsCache.length === 0) await loadAllServicesData();
             } else {
                 const attendanceData = await fetchData('attendance', currentServiceName);
@@ -1503,7 +1580,7 @@
 
         function waitChartsRendered() {
             return new Promise(resolve => {
-                const charts = [homeChart, adminChart, reportChart1, reportChart2].filter(Boolean);
+                const charts = [homeChart, adminChart, comparisonChart, reportChart1, reportChart2, profileChart].filter(Boolean);
                 let pending = charts.length;
                 if (pending === 0) {
                     resolve();
@@ -1531,7 +1608,7 @@
             const reportContent = DOMElements.reportContent;
             html2canvas(reportContent, { 
                 backgroundColor: document.body.classList.contains('dark') ? '#1f2937' : '#ffffff',
-                scale: 2, // Increase scale for better resolution
+                scale: 2,
                 useCORS: true 
             }).then(canvas => {
                 const link = document.createElement('a');
@@ -1574,8 +1651,6 @@
             const upcoming = [];
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-            const currentMonth = today.getMonth();
-            const currentYear = today.getFullYear();
             const thirtyDaysFromNow = new Date();
             thirtyDaysFromNow.setDate(today.getDate() + 30);
 
@@ -1588,17 +1663,16 @@
                 const birthDate = new Date(parseInt(dobParts[0]), parseInt(dobParts[1]) - 1, parseInt(dobParts[2]));
                 if (isNaN(birthDate.getTime())) return;
                 
-                let nextBirthday = new Date(currentYear, birthDate.getMonth(), birthDate.getDate());
+                let nextBirthday = new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate());
                 if (nextBirthday < today) {
-                    nextBirthday.setFullYear(currentYear + 1);
+                    nextBirthday.setFullYear(today.getFullYear() + 1);
                 }
 
                 const diffTime = nextBirthday - today;
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 
-                // Condition: within next 30 days OR in the current month
-                if ((nextBirthday >= today && nextBirthday <= thirtyDaysFromNow) || (nextBirthday.getMonth() === currentMonth && nextBirthday.getFullYear() === currentYear)) {
-                    if (!upcoming.some(b => b.name === servant.name)) { // Avoid duplicates
+                if (diffDays >= 0 && diffDays <= 30) {
+                    if (!upcoming.some(b => b.name === servant.name)) {
                          upcoming.push({
                             name: servant.name,
                             serviceName: servant.serviceName,
@@ -1618,19 +1692,16 @@
             DOMElements.adminDashboardContainer.classList.toggle('hidden-view', !isGeneralSecretaryMode);
 
             if (isGeneralSecretaryMode) {
-                // Admin Dashboard Logic
-                DOMElements.adminTotalServantsStat.textContent = allServantsCache.length;
                 renderAdminServantsTable(allServantsCache);
-
+                updateAdminDashboard(); // [MODIFIED] Call the new dashboard renderer
+                
                 const thirtyDaysAgo = new Date();
                 thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
                 const startDate = thirtyDaysAgo.toISOString().split('T')[0];
                 const endDate = new Date().toISOString().split('T')[0];
-
                 const filteredAttendance = allAttendanceCache.filter(item => item.date >= startDate && item.date <= endDate);
                 
-                const activityTotals = {};
-                const activityCounts = {};
+                const activityTotals = {}, activityCounts = {};
                 activities.forEach(act => { activityTotals[act.key] = 0; activityCounts[act.key] = 0; });
 
                 filteredAttendance.forEach(day => {
@@ -1659,51 +1730,28 @@
                     type: 'bar',
                     data: {
                         labels: activities.map(a => a.name),
-                        datasets: [{
-                            label: 'متوسط الحضور',
-                            data: avgAttendance,
-                            backgroundColor: activities.map(a => a.color),
-                            borderColor: activities.map(a => a.borderColor),
-                            borderWidth: 1,
-                            borderRadius: 5,
-                        }]
+                        datasets: [{ label: 'متوسط الحضور', data: avgAttendance, backgroundColor: activities.map(a => a.color), borderColor: activities.map(a => a.borderColor), borderWidth: 1, borderRadius: 5 }]
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: { y: { beginAtZero: true, max: 100, ticks: { callback: value => value + '%' } } },
-                        plugins: { legend: { display: false } }
-                    }
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100, ticks: { callback: value => value + '%' } } }, plugins: { legend: { display: false } } }
                 });
 
             } else {
                 // Regular Service Dashboard Logic
                 DOMElements.totalServantsStat.textContent = servantsCache.length;
                 const nextBirthday = getUpcomingBirthdays(servantsCache, 1);
-                if(nextBirthday.length > 0) {
-                    DOMElements.upcomingBirthdayStat.textContent = `${nextBirthday[0].name} (${nextBirthday[0].date})`;
-                } else {
-                    DOMElements.upcomingBirthdayStat.textContent = 'لا يوجد';
-                }
+                DOMElements.upcomingBirthdayStat.textContent = nextBirthday.length > 0 ? `${nextBirthday[0].name} (${nextBirthday[0].date})` : 'لا يوجد';
 
                 const thirtyDaysAgo = new Date();
                 thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
                 const startDate = thirtyDaysAgo.toISOString().split('T')[0];
                 const endDate = new Date().toISOString().split('T')[0];
                 
-                let attendanceData = isLocalMode ? Object.values(getLocalAttendance(currentServiceName) || {}) : allAttendanceCache;
-                if (!attendanceData || attendanceData.length === 0) {
-                     attendanceData = Object.entries(await fetchData('attendance', currentServiceName)).map(([date, data]) => ({ date, ...data }));
-                }
-
+                const attendanceObject = await fetchData('attendance', currentServiceName);
+                const attendanceData = Object.entries(attendanceObject).map(([date, data]) => ({ date, ...data }));
                 const filteredAttendance = attendanceData.filter(item => item.date >= startDate && item.date <= endDate);
                 
-                const activityTotals = {};
-                const activityCounts = {};
-                activities.forEach(act => { 
-                    activityTotals[act.key] = 0; 
-                    activityCounts[act.key] = 0; 
-                });
+                const activityTotals = {}, activityCounts = {};
+                activities.forEach(act => { activityTotals[act.key] = 0; activityCounts[act.key] = 0; });
 
                 filteredAttendance.forEach(day => {
                     activities.forEach(activity => {
@@ -1728,24 +1776,34 @@
                     type: 'bar',
                     data: {
                         labels: activities.map(a => a.name),
-                        datasets: [{
-                            label: 'متوسط الحضور',
-                            data: avgAttendance,
-                            backgroundColor: activities.map(a => a.color),
-                            borderColor: activities.map(a => a.borderColor),
-                            borderWidth: 1,
-                            borderRadius: 5,
-                        }]
+                        datasets: [{ label: 'متوسط الحضور', data: avgAttendance, backgroundColor: activities.map(a => a.color), borderColor: activities.map(a => a.borderColor), borderWidth: 1, borderRadius: 5 }]
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: { beginAtZero: true, max: 100, ticks: { callback: value => value + '%' } }
-                        },
-                        plugins: { legend: { display: false } }
-                    }
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100, ticks: { callback: value => value + '%' } } }, plugins: { legend: { display: false } } }
                 });
+
+                const monthlyLogContainer = DOMElements.monthlyActivityLog;
+                monthlyLogContainer.innerHTML = '';
+                const today = new Date();
+                const monthlyAttendance = attendanceData.filter(item => new Date(item.date).getMonth() === today.getMonth() && new Date(item.date).getFullYear() === today.getFullYear());
+
+                if (monthlyAttendance.length === 0) {
+                    monthlyLogContainer.innerHTML = '<p class="text-gray-400">لا توجد أنشطة مسجلة لهذا الشهر.</p>';
+                } else {
+                    let logHTML = '<ul class="space-y-2 max-h-32 overflow-y-auto">';
+                    monthlyAttendance.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    monthlyAttendance.forEach(day => {
+                        const formattedDate = new Date(day.date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long' });
+                        activities.forEach(activity => {
+                            const activityData = day[activity.key];
+                            if (activityData) {
+                                let statusText = activityData.note ? `تم إلغاء نشاط <strong>${activity.name}</strong>.` : (activityData.attendees && activityData.attendees.length > 0) ? `تم تسجيل حضور <strong>${activity.name}</strong> لـ ${activityData.attendees.length} خدام.` : '';
+                                if (statusText) logHTML += `<li class="flex items-start"><i class="fas fa-check-circle text-cyan-500 mt-1 mr-2"></i><span>يوم <strong>${formattedDate}</strong>: ${statusText}</span></li>`;
+                            }
+                        });
+                    });
+                    logHTML += '</ul>';
+                    monthlyLogContainer.innerHTML = logHTML;
+                }
             }
         }
 
@@ -1757,10 +1815,10 @@
             }
             servantsToRender.forEach(servant => {
                 const row = document.createElement('tr');
-                row.className = 'border-b dark:border-gray-700';
+                row.className = 'border-b dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors';
                 const val = (data) => data || 'غير متوفر';
                 row.innerHTML = `
-                    <td class="p-3 font-semibold">${val(servant.name)}</td>
+                    <td class="p-3 font-semibold"><a href="#" class="text-cyan-600 hover:underline" data-servant-id="${servant.id}">${val(servant.name)}</a></td>
                     <td class="p-3">${val(servant.serviceName)}</td>
                     <td class="p-3">${val(servant.mobile)}</td>`;
                 DOMElements.adminServantsTableBody.appendChild(row);
@@ -1832,7 +1890,13 @@
                 );
                 renderAdminServantsTable(filteredServants);
             });
-
+            DOMElements.addAnnouncementBtn.addEventListener('click', addAnnouncement);
+            DOMElements.adminServantsTableBody.addEventListener('click', (e) => {
+                if(e.target.tagName === 'A' && e.target.dataset.servantId) {
+                    e.preventDefault();
+                    showUnifiedProfile(e.target.dataset.servantId);
+                }
+            });
 
             // Servants Page Listeners
             DOMElements.searchInput.addEventListener('input', (e) => {
@@ -1980,11 +2044,14 @@
                     document.querySelectorAll('.report-tab').forEach(t => t.classList.remove('active'));
                     tab.classList.add('active');
                     currentReportType = tab.dataset.reportType;
-                    DOMElements.reportOutput.classList.add('hidden-view');
-                    if (currentReportType === 'individual') {
-                        DOMElements.servantSelectorContainer.classList.remove('hidden-view');
-                    } else {
-                        DOMElements.servantSelectorContainer.classList.add('hidden-view');
+
+                    const isComparison = currentReportType === 'comparison';
+                    DOMElements.standardReportsContainer.classList.toggle('hidden-view', isComparison);
+                    DOMElements.comparisonReportContainer.classList.toggle('hidden-view', !isComparison);
+                    
+                    if (!isComparison) {
+                        DOMElements.reportOutput.classList.add('hidden-view');
+                        DOMElements.servantSelectorContainer.classList.toggle('hidden-view', currentReportType !== 'individual');
                     }
                 }
             });
@@ -1996,6 +2063,7 @@
                 populateReportServantSelector(filteredServants);
             });
             DOMElements.generateReportBtn.addEventListener('click', triggerReportGeneration);
+            DOMElements.generateComparisonBtn.addEventListener('click', generateComparisonReport);
             DOMElements.exportPngBtn.addEventListener('click', exportAsImage);
             DOMElements.exportPdfBtn.addEventListener('click', exportAsPdf);
             
@@ -2009,6 +2077,500 @@
                 DOMElements.sidebarOverlay.classList.add('hidden');
             });
         }
+
+        // ==================================================================
+        // --- NEW/MODIFIED FUNCTIONS FOR SECRETARY GENERAL ---
+        // ==================================================================
+
+        function populateAnnouncementTargetSelector() {
+            const container = document.getElementById('announcementTarget');
+            if (!container) return;
+            container.innerHTML = ''; // Clear previous content
+
+            // Add "Select All" checkbox
+            container.innerHTML += `
+                <div class="flex items-center p-1">
+                    <input id="announcement-target-all" type="checkbox" value="all" class="w-4 h-4 text-cyan-600 bg-gray-100 border-gray-300 rounded focus:ring-cyan-500 ml-2 cursor-pointer">
+                    <label for="announcement-target-all" class="font-bold cursor-pointer">الكل</label>
+                </div>
+            `;
+
+            const serviceNames = services
+                .filter(s => s.name !== 'الامين العام')
+                .map(s => s.name);
+            serviceNames.sort((a,b) => a.localeCompare(b,'ar')).forEach(name => {
+                const checkboxId = `ann-target-${name.replace(/\s+/g, '-')}`;
+                container.innerHTML += `
+                    <div class="flex items-center p-1">
+                        <input id="${checkboxId}" type="checkbox" value="${name}" class="w-4 h-4 text-cyan-600 bg-gray-100 border-gray-300 rounded focus:ring-cyan-500 ml-2 cursor-pointer service-target-checkbox">
+                        <label for="${checkboxId}" class="cursor-pointer">${name}</label>
+                    </div>
+                `;
+            });
+
+            // Add event listener for "Select All"
+            const allCheckbox = container.querySelector('#announcement-target-all');
+            const serviceCheckboxes = container.querySelectorAll('.service-target-checkbox');
+            allCheckbox.addEventListener('change', (e) => {
+                serviceCheckboxes.forEach(cb => {
+                    cb.checked = e.target.checked;
+                });
+            });
+
+            serviceCheckboxes.forEach(cb => {
+                cb.addEventListener('change', () => {
+                    if (!cb.checked) {
+                        allCheckbox.checked = false;
+                    } else {
+                        const allChecked = Array.from(serviceCheckboxes).every(c => c.checked);
+                        allCheckbox.checked = allChecked;
+                    }
+                });
+            });
+        }
+
+        function listenForAnnouncements() {
+            if (announcementsUnsubscribe) announcementsUnsubscribe();
+            const announcementsCol = collection(db, 'announcements');
+            const q = query(announcementsCol, orderBy('timestamp', 'desc'));
+            announcementsUnsubscribe = onSnapshot(q, (snapshot) => {
+                const announcements = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                displayAnnouncements(announcements);
+            });
+        }
+
+        function displayAnnouncements(announcements) {
+            const adminList = DOMElements.adminAnnouncementsList;
+            const userDisplay = DOMElements.announcementsDisplay;
+            
+            if (adminList && isGeneralSecretaryMode) {
+                adminList.innerHTML = '';
+                if (announcements.length === 0) {
+                    adminList.innerHTML = '<p class="text-gray-500">لا توجد إعلانات حالياً.</p>';
+                } else {
+                    announcements.forEach(ann => {
+                        const date = ann.timestamp?.toDate().toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' }) || 'غير محدد';
+                        const targets = ann.targetServices || ['غير محدد'];
+                        const targetText = targets.includes('all') ? 'الكل' : targets.join(', ');
+
+                        adminList.innerHTML += `
+                            <div class="bg-gray-100 dark:bg-gray-700/50 p-3 rounded-lg flex justify-between items-start gap-4">
+                                <div>
+                                    <p class="text-gray-800 dark:text-gray-200">${ann.text}</p>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-2 flex items-center gap-4">
+                                        <span><i class="fas fa-calendar-alt mr-1"></i> ${date}</span>
+                                        <span><i class="fas fa-bullseye mr-1"></i> <strong>موجه إلى:</strong> ${targetText}</span>
+                                    </div>
+                                </div>
+                                <button data-id="${ann.id}" class="delete-announcement-btn text-red-500 hover:text-red-700 text-sm flex-shrink-0">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>`;
+                    });
+                    adminList.querySelectorAll('.delete-announcement-btn').forEach(btn => {
+                        btn.addEventListener('click', async (e) => {
+                            const id = e.currentTarget.dataset.id;
+                            showConfirm('تأكيد الحذف', 'هل أنت متأكد من حذف هذا الإعلان؟', async () => {
+                                 await deleteDoc(doc(db, 'announcements', id));
+                                 showMessage('تم حذف الإعلان.');
+                            });
+                        });
+                    });
+                }
+            }
+
+            if (userDisplay && !isGeneralSecretaryMode) {
+                userDisplay.innerHTML = '';
+                const relevantAnnouncements = announcements.filter(ann => 
+                    ann.targetServices && (ann.targetServices.includes('all') || ann.targetServices.includes(currentServiceName))
+                );
+
+                if (relevantAnnouncements.length > 0) {
+                    const latestAnn = relevantAnnouncements[0];
+                    userDisplay.innerHTML = `
+                        <div class="bg-cyan-100 dark:bg-cyan-900 border-r-4 border-cyan-500 text-cyan-800 dark:text-cyan-200 p-4 rounded-lg shadow">
+                            <div class="flex items-center">
+                                <i class="fas fa-bullhorn text-2xl ml-4"></i>
+                                <div>
+                                    <h4 class="font-bold">إعلان هام من الأمين العام</h4>
+                                    <p>${latestAnn.text}</p>
+                                </div>
+                            </div>
+                        </div>`;
+                }
+            }
+        }
+
+        async function addAnnouncement() {
+            const input = DOMElements.newAnnouncementInput;
+            const text = input.value.trim();
+            const targetContainer = document.getElementById('announcementTarget');
+            const allCheckbox = targetContainer.querySelector('#announcement-target-all');
+            const selectedCheckboxes = Array.from(targetContainer.querySelectorAll('.service-target-checkbox:checked'));
+            const selectedOptions = selectedCheckboxes.map(cb => cb.value);
+
+            if (text && (allCheckbox.checked || selectedOptions.length > 0)) {
+                const targetServices = allCheckbox.checked ? ['all'] : selectedOptions;
+                
+                try {
+                    await addDoc(collection(db, 'announcements'), {
+                        text: text,
+                        targetServices: targetServices,
+                        timestamp: serverTimestamp()
+                    });
+                    input.value = '';
+                    targetContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+                    showMessage('تم إضافة الإعلان بنجاح.');
+                } catch (error) {
+                    console.error("Error adding announcement: ", error);
+                    showMessage('فشل إضافة الإعلان.', true);
+                }
+            } else {
+                showMessage('الرجاء كتابة نص الإعلان واختيار خدمة واحدة على الأقل.', true);
+            }
+        }
+
+        /**
+         * [NEW] Renders the main KPI cards at the top of the admin dashboard.
+         */
+        function renderAdminKPIs() {
+            const kpiContainer = DOMElements.kpiContainer;
+            kpiContainer.innerHTML = '';
+            kpiContainer.className = 'grid grid-cols-1 sm:grid-cols-2 gap-6';
+
+            // KPI 1: Total Servants
+            kpiContainer.innerHTML += createKpiCard('users', 'إجمالي الخدام', allServantsCache.length, 'خادم في جميع الخدمات', 'bg-blue-100 dark:bg-blue-800', 'text-blue-600');
+
+            // KPI 2: Top Service this month
+            const serviceAttendance = {};
+            const today = new Date();
+            const currentMonth = today.getMonth();
+            const currentYear = today.getFullYear();
+            allAttendanceCache.forEach(item => {
+                const itemDate = new Date(item.date);
+                if (itemDate.getMonth() === currentMonth && itemDate.getFullYear() === currentYear) {
+                    if (!serviceAttendance[item.serviceName]) {
+                        serviceAttendance[item.serviceName] = { totalAttendees: 0, totalPossible: 0 };
+                    }
+                    const serviceServantsCount = allServantsCache.filter(s => s.serviceName === item.serviceName).length;
+                    if (serviceServantsCount > 0) {
+                        Object.keys(item).forEach(key => {
+                            if (activityMap.has(key) && item[key].attendees) {
+                                serviceAttendance[item.serviceName].totalAttendees += item[key].attendees.length;
+                                serviceAttendance[item.serviceName].totalPossible += serviceServantsCount;
+                            }
+                        });
+                    }
+                }
+            });
+            let topService = { name: 'لا يوجد', avg: 0 };
+            for (const serviceName in serviceAttendance) {
+                const data = serviceAttendance[serviceName];
+                const avg = data.totalPossible > 0 ? (data.totalAttendees / data.totalPossible) * 100 : 0;
+                if (avg > topService.avg) {
+                    topService = { name: serviceName, avg: avg };
+                }
+            }
+            kpiContainer.innerHTML += createKpiCard('star', 'الخدمة الأعلى حضوراً', topService.name, `${topService.avg.toFixed(1)}% هذا الشهر`, 'bg-green-100 dark:bg-green-800', 'text-green-600');
+        }
+
+        /**
+         * [NEW] Renders the "Servants Needing Follow-up" panel.
+         */
+        function renderFollowUpPanel(servantAttendanceSummary) {
+            const container = DOMElements.followUpPanel;
+            if (!container) return;
+
+            const needsFollowUp = Object.values(servantAttendanceSummary)
+                .map(s => ({ ...s, percentage: s.possible > 0 ? (s.attended / s.possible) * 100 : 0 }))
+                // [FIXED] Changed condition from > 8 to > 4
+                .filter(s => s.possible > 4 && s.percentage < 50)
+                .sort((a, b) => a.percentage - b.percentage);
+
+            if (needsFollowUp.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center p-4">لا يوجد خدام حالياً بحاجة للمتابعة.</p>';
+                return;
+            }
+
+            container.innerHTML = needsFollowUp.map(s => `
+                <div class="p-2.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/50 flex justify-between items-center transition-colors">
+                    <div>
+                        <p class="font-semibold text-sm">${s.name}</p>
+                        <p class="text-xs text-gray-500">${s.service}</p>
+                    </div>
+                    <div class="text-red-500 font-bold text-sm">${s.percentage.toFixed(0)}%</div>
+                </div>
+            `).join('');
+        }
+
+        /**
+         * [NEW] Renders the "Upcoming Birthdays" panel for all services.
+         */
+        function renderBirthdaysPanel() {
+            const container = DOMElements.birthdaysPanel;
+            if (!container) return;
+
+            const upcomingBdays = getUpcomingBirthdays(allServantsCache, 100); // Get all in next 30 days
+
+            if (upcomingBdays.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center p-4">لا توجد أعياد ميلاد خلال الـ 30 يوم القادمة.</p>';
+                return;
+            }
+
+            container.innerHTML = upcomingBdays.map(bday => `
+                 <div class="p-2.5 rounded-lg hover:bg-pink-100 dark:hover:bg-pink-900/50 flex justify-between items-center transition-colors">
+                    <div>
+                        <p class="font-semibold text-sm">${bday.name}</p>
+                        <p class="text-xs text-gray-500">${bday.serviceName}</p>
+                    </div>
+                    <div class="text-pink-500 font-bold text-sm whitespace-nowrap">${bday.date}</div>
+                </div>
+            `).join('');
+        }
+
+        /**
+         * [MODIFIED] This is the new main renderer for the admin dashboard.
+         */
+        function updateAdminDashboard() {
+            // --- Calculations (can be done once) ---
+            const servantAttendanceSummary = {};
+            allServantsCache.forEach(s => servantAttendanceSummary[s.id] = { attended: 0, possible: 0, name: s.name, service: s.serviceName });
+            
+            // [FIXED] Changed from 6 months to 3 months
+            const lastThreeMonths = new Date();
+            lastThreeMonths.setMonth(lastThreeMonths.getMonth() - 3);
+            
+            allAttendanceCache.filter(rec => new Date(rec.date) >= lastThreeMonths).forEach(item => {
+                activities.forEach(act => {
+                    if(item[act.key] && Array.isArray(item[act.key].attendees)) {
+                        const presentIds = new Set(item[act.key].attendees);
+                        const serviceServants = allServantsCache.filter(s => s.serviceName === item.serviceName);
+                        serviceServants.forEach(servant => {
+                            if (servantAttendanceSummary[servant.id]) {
+                                servantAttendanceSummary[servant.id].possible++;
+                                if(presentIds.has(servant.id)) servantAttendanceSummary[servant.id].attended++;
+                            }
+                        });
+                    }
+                });
+            });
+
+            // --- Render Components ---
+            renderAdminKPIs();
+            renderFollowUpPanel(servantAttendanceSummary);
+            renderBirthdaysPanel();
+        }
+        
+        function createKpiCard(icon, title, value, subtext, bgColor, textColor) {
+            return `
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex items-center gap-4">
+                    <div class="${bgColor} p-4 rounded-full flex-shrink-0">
+                        <i class="fas fa-${icon} ${textColor} text-2xl w-8 h-8 text-center leading-8"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 dark:text-gray-400 font-bold">${title}</p>
+                        <p class="text-2xl font-bold truncate" title="${value}">${value}</p>
+                        <div class="text-gray-500 dark:text-gray-400 text-sm">${subtext}</div>
+                    </div>
+                </div>`;
+        }
+        
+        function showUnifiedProfile(servantId) {
+            const servant = allServantsCache.find(s => s.id === servantId);
+            if (!servant) return;
+
+            // --- Attendance Breakdown Calculation ---
+            const activityBreakdown = {};
+            activities.forEach(act => activityBreakdown[act.key] = { attended: 0, possible: 0 });
+
+            const servantRecords = allAttendanceCache.filter(rec => rec.serviceName === servant.serviceName);
+            
+            servantRecords.forEach(item => {
+                 activities.forEach(act => {
+                    if(item[act.key] && Array.isArray(item[act.key].attendees)) {
+                        activityBreakdown[act.key].possible++;
+                        if(item[act.key].attendees.includes(servantId)) {
+                            activityBreakdown[act.key].attended++;
+                        }
+                    }
+                 });
+            });
+
+            let breakdownHTML = '';
+            for(const key in activityBreakdown) {
+                const data = activityBreakdown[key];
+                const percentage = data.possible > 0 ? Math.round((data.attended / data.possible) * 100) : 0;
+                breakdownHTML += `
+                    <div>
+                        <p class="text-sm font-semibold">${activityMap.get(key).name}</p>
+                        <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2.5">
+                            <div class="${getPercentageColor(percentage)} h-2.5 rounded-full" style="width: ${percentage}%"></div>
+                        </div>
+                        <p class="text-xs text-right">${data.attended}/${data.possible} (${percentage}%)</p>
+                    </div>
+                `;
+            }
+
+            // --- Profile Body HTML ---
+            const val = (data) => data || 'غير متوفر';
+            const body = `
+                <div class="flex flex-col md:flex-row gap-8">
+                    <div class="flex-shrink-0 text-center md:w-1/3">
+                        <img src="${servant.imageUrl || 'https://placehold.co/120x120/E2E8F0/4A5568?text=?'}" class="w-32 h-32 rounded-full mx-auto object-cover border-4 border-cyan-500 shadow-lg">
+                        <h4 class="text-xl font-bold mt-3">${val(servant.name)}</h4>
+                        <p class="text-gray-500">${val(servant.serviceName)}</p>
+                    </div>
+                    <div class="flex-grow md:w-2/3">
+                        <div class="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
+                            <p><strong><i class="fas fa-mobile-alt w-5 text-cyan-600"></i> الموبايل:</strong> ${val(servant.mobile)}</p>
+                            <p><strong><i class="fas fa-birthday-cake w-5 text-cyan-600"></i> ت. الميلاد:</strong> ${val(servant.dob)}</p>
+                            <p class="col-span-2"><strong><i class="fas fa-id-card w-5 text-cyan-600"></i> الرقم القومي:</strong> ${val(servant.nationalId)}</p>
+                            <p><strong><i class="fas fa-briefcase w-5 text-cyan-600"></i> الوظيفة:</strong> ${val(servant.job)}</p>
+                            <p><strong><i class="fas fa-graduation-cap w-5 text-cyan-600"></i> المؤهل:</strong> ${val(servant.qualification)}</p>
+                            <p class="col-span-2"><strong><i class="fas fa-map-marker-alt w-5 text-cyan-600"></i> العنوان:</strong> ${val(servant.address)}</p>
+                            <p class="col-span-2"><strong><i class="fas fa-cross w-5 text-cyan-600"></i> أب الاعتراف:</strong> ${val(servant.confessionFather)}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-6 border-t dark:border-gray-700 pt-4">
+                    <h5 class="font-bold mb-3">ملخص الحضور العام</h5>
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                        ${breakdownHTML}
+                    </div>
+                </div>
+                 <div class="mt-6 border-t dark:border-gray-700 pt-4">
+                    <h5 class="font-bold mb-2">معدل الحضور الشهري (آخر 6 أشهر)</h5>
+                    <div class="relative h-48"><canvas id="profileAttendanceChart"></canvas></div>
+                </div>
+            `;
+            DOMElements.unifiedProfileModalBody.innerHTML = body;
+            openModal(DOMElements.unifiedProfileModal);
+            
+            // --- [NEW] Generate Profile Chart ---
+            generateProfileAttendanceChart(servantId, servant.serviceName);
+        }
+        
+        function generateProfileAttendanceChart(servantId, serviceName) {
+            const monthlyData = {};
+            const monthLabels = [];
+            
+            // Initialize last 6 months
+            for (let i = 5; i >= 0; i--) {
+                const d = new Date();
+                d.setMonth(d.getMonth() - i);
+                const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                monthLabels.push(d.toLocaleDateString('ar-EG', { month: 'short', year: 'numeric' }));
+                monthlyData[monthKey] = { attended: 0, possible: 0 };
+            }
+
+            const servantRecords = allAttendanceCache.filter(rec => rec.serviceName === serviceName);
+            servantRecords.forEach(item => {
+                const itemMonthKey = item.date.substring(0, 7);
+                if (monthlyData[itemMonthKey]) {
+                    activities.forEach(act => {
+                        if (item[act.key] && Array.isArray(item[act.key].attendees)) {
+                            monthlyData[itemMonthKey].possible++;
+                            if (item[act.key].attendees.includes(servantId)) {
+                                monthlyData[itemMonthKey].attended++;
+                            }
+                        }
+                    });
+                }
+            });
+
+            const percentages = Object.values(monthlyData).map(data => 
+                data.possible > 0 ? Math.round((data.attended / data.possible) * 100) : 0
+            );
+
+            if (profileChart) profileChart.destroy();
+            const ctx = document.getElementById('profileAttendanceChart').getContext('2d');
+            profileChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: monthLabels,
+                    datasets: [{
+                        label: 'نسبة الحضور',
+                        data: percentages,
+                        borderColor: 'rgb(14, 116, 144)', // cyan-700
+                        backgroundColor: 'rgba(14, 116, 144, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, max: 100, ticks: { callback: value => value + '%' } } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function populateComparisonSelectors() {
+            const selectors = [DOMElements.comparisonServiceSelector1, DOMElements.comparisonServiceSelector2];
+            const serviceNames = services.filter(s => s.name !== 'الامين العام').map(s => s.name);
+            selectors.forEach(selector => {
+                selector.innerHTML = '<option value="">اختر خدمة</option>';
+                serviceNames.forEach(name => {
+                    selector.innerHTML += `<option value="${name}">${name}</option>`;
+                });
+            });
+        }
+
+        function generateComparisonReport() {
+            const service1 = DOMElements.comparisonServiceSelector1.value;
+            const service2 = DOMElements.comparisonServiceSelector2.value;
+
+            if (!service1 || !service2) {
+                return showMessage('الرجاء اختيار خدمتين للمقارنة.', true);
+            }
+            if (service1 === service2) {
+                return showMessage('الرجاء اختيار خدمتين مختلفتين.', true);
+            }
+
+            const calculateAverages = (serviceName) => {
+                const serviceServantsCount = allServantsCache.filter(s => s.serviceName === serviceName).length;
+                if (serviceServantsCount === 0) return activities.map(() => 0);
+                
+                const activityTotals = {};
+                activities.forEach(act => activityTotals[act.key] = { attended: 0, possible: 0 });
+
+                allAttendanceCache.filter(rec => rec.serviceName === serviceName).forEach(item => {
+                    activities.forEach(act => {
+                        if (item[act.key] && item[act.key].attendees) {
+                            activityTotals[act.key].attended += item[act.key].attendees.length;
+                            activityTotals[act.key].possible += serviceServantsCount;
+                        }
+                    });
+                });
+                
+                return activities.map(act => {
+                    const data = activityTotals[act.key];
+                    return data.possible > 0 ? Math.round((data.attended / data.possible) * 100) : 0;
+                });
+            };
+
+            const data1 = calculateAverages(service1);
+            const data2 = calculateAverages(service2);
+
+            if (comparisonChart) comparisonChart.destroy();
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+            comparisonChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: activities.map(a => a.name),
+                    datasets: [
+                        { label: service1, data: data1, backgroundColor: 'rgba(54, 162, 235, 0.6)', borderColor: 'rgba(54, 162, 235, 1)', borderWidth: 1 },
+                        { label: service2, data: data2, backgroundColor: 'rgba(255, 99, 132, 0.6)', borderColor: 'rgba(255, 99, 132, 1)', borderWidth: 1 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: { y: { beginAtZero: true, max: 100, ticks: { callback: value => value + '%' } } }
+                }
+            });
+        }
+
 
         // --- APP INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', () => {
@@ -2067,13 +2629,30 @@
                 restoreBtn: document.getElementById('restoreBtn'),
                 totalServantsStat: document.getElementById('totalServantsStat'),
                 upcomingBirthdayStat: document.getElementById('upcomingBirthdayStat'),
+                monthlyActivityLog: document.getElementById('monthlyActivityLog'),
                 quickAddServant: document.getElementById('quickAddServant'),
                 quickGoToAttendance: document.getElementById('quickGoToAttendance'),
                 serviceDashboardContainer: document.getElementById('serviceDashboardContainer'),
                 adminDashboardContainer: document.getElementById('adminDashboardContainer'),
-                adminTotalServantsStat: document.getElementById('adminTotalServantsStat'),
                 adminServantsTableBody: document.getElementById('adminServantsTableBody'),
                 adminSearchInput: document.getElementById('adminSearchInput'),
+                kpiContainer: document.getElementById('kpiContainer'),
+                adminAnnouncementsList: document.getElementById('adminAnnouncementsList'),
+                newAnnouncementInput: document.getElementById('newAnnouncementInput'),
+                addAnnouncementBtn: document.getElementById('addAnnouncementBtn'),
+                announcementsDisplay: document.getElementById('announcementsDisplay'),
+                unifiedProfileModal: document.getElementById('unifiedProfileModal'),
+                unifiedProfileModalTitle: document.getElementById('unifiedProfileModalTitle'),
+                unifiedProfileModalBody: document.getElementById('unifiedProfileModalBody'),
+                comparisonReportTab: document.getElementById('comparisonReportTab'),
+                standardReportsContainer: document.getElementById('standardReportsContainer'),
+                comparisonReportContainer: document.getElementById('comparisonReportContainer'),
+                comparisonServiceSelector1: document.getElementById('comparisonServiceSelector1'),
+                comparisonServiceSelector2: document.getElementById('comparisonServiceSelector2'),
+                generateComparisonBtn: document.getElementById('generateComparisonBtn'),
+                // [NEW] Add new panel IDs to cache
+                followUpPanel: document.getElementById('followUpPanel'),
+                birthdaysPanel: document.getElementById('birthdaysPanel'),
             };
 
             initializeFirebase();
@@ -2084,4 +2663,3 @@
     </script>
 </body>
 </html>
-
