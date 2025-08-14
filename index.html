@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale-1.0">
     <title>نظام إدارة الخدمة بالكنيسة</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -141,24 +141,23 @@
                         <!-- Service-specific Dashboard -->
                         <div id="serviceDashboardContainer">
                              <h1 class="text-3xl font-bold mb-6">لوحة معلومات الخدمة</h1>
-                             <!-- Announcements Section for Regular Services -->
-                            <div id="announcementsDisplay" class="mb-6"></div>
-                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex items-center gap-4">
+                             <div id="announcementsDisplay" class="mb-6"></div>
+                             <!-- [MODIFIED] Grid layout for service dashboard stats -->
+                             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                                <div class="md:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex items-center gap-4">
                                     <i class="fas fa-users text-4xl text-cyan-500"></i>
                                     <div>
                                         <p class="text-gray-500 dark:text-gray-400 text-sm">إجمالي الخدام</p>
                                         <p id="totalServantsStat" class="text-3xl font-bold">0</p>
                                     </div>
                                 </div>
-                                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex items-center gap-4">
-                                    <i class="fas fa-birthday-cake text-4xl text-pink-500"></i>
-                                    <div>
-                                        <p class="text-gray-500 dark:text-gray-400 text-sm">أقرب عيد ميلاد</p>
-                                        <p id="upcomingBirthdayStat" class="text-lg font-bold">لا يوجد</p>
+                                <div class="md:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col">
+                                    <h3 class="font-bold text-pink-600 dark:text-pink-400 mb-2 text-lg flex-shrink-0">أعياد ميلاد قادمة (خلال 30 يوم)</h3>
+                                    <div id="upcomingBirthdayStat" class="overflow-y-auto flex-grow" style="max-height: 100px;">
+                                        <!-- Birthday list will be populated here -->
                                     </div>
                                 </div>
-                                <div class="md:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                                <div class="md:col-span-4 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
                                     <h3 class="font-bold text-gray-700 dark:text-gray-300 mb-2">الأنشطة المسجلة هذا الشهر</h3>
                                     <div id="monthlyActivityLog" class="text-sm text-gray-500 dark:text-gray-400">
                                         جاري تحميل البيانات...
@@ -1734,10 +1733,21 @@
                 });
 
             } else {
-                // Regular Service Dashboard Logic
+                // [MODIFIED] Logic for updated service dashboard
                 DOMElements.totalServantsStat.textContent = servantsCache.length;
-                const nextBirthday = getUpcomingBirthdays(servantsCache, 1);
-                DOMElements.upcomingBirthdayStat.textContent = nextBirthday.length > 0 ? `${nextBirthday[0].name} (${nextBirthday[0].date})` : 'لا يوجد';
+                const birthdayContainer = DOMElements.upcomingBirthdayStat;
+                const upcomingBirthdays = getUpcomingBirthdays(servantsCache, 100);
+
+                if (upcomingBirthdays.length > 0) {
+                    birthdayContainer.innerHTML = '<ul class="space-y-2"></ul>';
+                    const ul = birthdayContainer.querySelector('ul');
+                    upcomingBirthdays.forEach(person => {
+                        const dayText = person.daysUntil === 0 ? 'اليوم!' : `بعد ${person.daysUntil} يوم`;
+                        ul.innerHTML += `<li class="flex justify-between items-center text-sm"><span><strong>${person.name}</strong></span><span class="text-gray-500">${person.date} (${dayText})</span></li>`;
+                    });
+                } else {
+                    birthdayContainer.innerHTML = '<p class="text-gray-500 text-center pt-4">لا توجد أعياد ميلاد قادمة.</p>';
+                }
 
                 const thirtyDaysAgo = new Date();
                 thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
