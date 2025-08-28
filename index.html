@@ -2,14 +2,14 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale-1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام إدارة الخدمة بالكنيسة</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Cairo for Arabic text -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <!-- SheetJS (xlsx) library for Excel file processing -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <!-- Font Awesome for Icons -->
@@ -27,10 +27,21 @@
             --color-primary-darker: #0e7490; /* cyan-700 */
             --color-primary-light: #ccfbf1; /* cyan-100 */
             --color-primary-text: #115e59; /* cyan-900 */
+            
+            /* New Color System */
+            --color-success: #16a34a; /* green-600 */
+            --color-danger: #dc2626;  /* red-600 */
+            --color-warning: #f59e0b; /* amber-500 */
+            --color-info: #2563eb;    /* blue-600 */
+        }
+        html.dark {
+             --color-primary-light: #22d3ee1a;
+             --color-primary-text: #a5f3fc;
         }
         body { 
             font-family: 'Cairo', sans-serif; 
             background-color: #f8fafc; /* gray-50 */
+            transition: background-color 0.3s ease;
         }
         .modal-backdrop { background-color: rgba(0, 0, 0, 0.6); }
         .hidden-view { display: none !important; }
@@ -45,7 +56,7 @@
             color: var(--color-primary-text);
             transform: translateX(-4px);
         }
-        .report-tab.active {
+        .report-tab.active, .activity-filter-btn.active {
             border-color: var(--color-primary);
             background-color: var(--color-primary);
             color: white;
@@ -71,12 +82,79 @@
         }
         /* Custom scrollbar for better aesthetics */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        .dark ::-webkit-scrollbar-track { background: #2d3748; }
         ::-webkit-scrollbar-thumb { background: #a0a0a0; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #777; }
         
-        #profileAttendanceChart {
-            max-height: 200px;
+        /* Typography System */
+        .h1 { font-size: 2.25rem; font-weight: 700; } /* 36px */
+        .h2 { font-size: 1.5rem; font-weight: 700; }  /* 24px */
+        .h3 { font-size: 1.25rem; font-weight: 700; } /* 20px */
+        .body-text { font-size: 1rem; font-weight: 400; } /* 16px */
+        .small-text { font-size: 0.875rem; } /* 14px */
+
+        /* Theme Toggle Switch */
+        .theme-switch-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .theme-switch {
+            display: inline-block;
+            height: 26px;
+            position: relative;
+            width: 50px;
+        }
+        .theme-switch input {
+            display:none;
+        }
+        .slider {
+            background-color: #ccc;
+            bottom: 0;
+            cursor: pointer;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            transition: .4s;
+        }
+        .slider:before {
+            background-color: #fff;
+            bottom: 3px;
+            content: "";
+            height: 20px;
+            left: 3px;
+            position: absolute;
+            transition: .4s;
+            width: 20px;
+        }
+        input:checked + .slider {
+            background-color: var(--color-primary);
+        }
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+        .slider.round {
+            border-radius: 34px;
+        }
+        .slider.round:before {
+            border-radius: 50%;
+        }
+        .notification-badge {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background-color: var(--color-danger);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -92,8 +170,8 @@
     <div id="loginOrServicesView">
         <div class="container mx-auto px-4 py-8 md:py-12">
             <header class="text-center mb-10">
-                <h1 class="text-3xl md:text-4xl font-bold text-blue-800 dark:text-blue-400">نظام إدارة خدمة ابتدائي</h1>
-                <h2 class="text-xl md:text-2xl font-bold text-red-800 dark:text-red-400 mt-2">كنيسة مار بولس بالعبور</h2>
+                <h1 class="h1 text-blue-800 dark:text-blue-400">نظام إدارة خدمة ابتدائي</h1>
+                <h2 class="h2 text-red-800 dark:text-red-400 mt-2">كنيسة مار بولس بالعبور</h2>
                 <p class="mt-4 text-lg text-gray-600 dark:text-gray-400">اختر الخدمة التي تريدها</p>
             </header>
             <main id="servicesGrid" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
@@ -108,20 +186,31 @@
             <!-- Sidebar -->
             <nav id="sidebar" class="fixed md:relative inset-y-0 right-0 z-30 w-64 bg-white dark:bg-gray-900 shadow-lg flex flex-col transform translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
                 <div class="p-4 border-b dark:border-gray-700 text-center">
-                    <h2 class="text-xl font-bold text-cyan-600 dark:text-cyan-400">قائمة التحكم</h2>
+                    <h2 class="h3 text-cyan-600 dark:text-cyan-400">قائمة التحكم</h2>
                     <p id="sidebarServiceName" class="text-sm text-gray-500 mt-1"></p>
                 </div>
                 <div id="sidebarLinks" class="flex-grow pt-4">
                     <a href="#" data-page="homePage" class="sidebar-link active flex items-center py-3 px-4 text-gray-700 dark:text-gray-300"><i class="fas fa-tachometer-alt ml-3 w-6 text-center"></i> لوحة المعلومات</a>
+                    <a href="#" data-page="followUpPage" id="followUpLink" class="sidebar-link flex items-center py-3 px-4 text-gray-700 dark:text-gray-300 hidden-view"><i class="fas fa-clipboard-check ml-3 w-6 text-center"></i> صفحة المتابعة</a>
                     <a href="#" data-page="servantsPage" class="sidebar-link flex items-center py-3 px-4 text-gray-700 dark:text-gray-300"><i class="fas fa-users ml-3 w-6 text-center"></i> إدارة الخدام</a>
                     <a href="#" data-page="attendancePage" class="sidebar-link flex items-center py-3 px-4 text-gray-700 dark:text-gray-300"><i class="fas fa-check-square ml-3 w-6 text-center"></i> تسجيل الحضور</a>
                     <a href="#" data-page="reportsPage" class="sidebar-link flex items-center py-3 px-4 text-gray-700 dark:text-gray-300"><i class="fas fa-chart-pie ml-3 w-6 text-center"></i> التقارير والإحصائيات</a>
+                    <a href="#" data-page="activityAnalysisPage" id="activityAnalysisLink" class="sidebar-link flex items-center py-3 px-4 text-gray-700 dark:text-gray-300 hidden-view"><i class="fas fa-chart-line ml-3 w-6 text-center"></i> تحليل الأنشطة</a>
+                    <a href="#" data-page="messagesPage" class="sidebar-link flex items-center py-3 px-4 text-gray-700 dark:text-gray-300 relative"><i class="fas fa-envelope ml-3 w-6 text-center"></i> الرسائل <span id="messagesBadge" class="notification-badge hidden-view"></span></a>
                 </div>
                 <div class="p-4 border-t dark:border-gray-700 space-y-2">
+                     <div class="theme-switch-wrapper py-2">
+                        <i class="fas fa-moon text-gray-500"></i>
+                        <label class="theme-switch" for="theme-checkbox">
+                            <input type="checkbox" id="theme-checkbox" />
+                            <div class="slider round"></div>
+                        </label>
+                        <i class="fas fa-sun text-yellow-500"></i>
+                    </div>
                     <button id="backToServices" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300 flex items-center justify-center">
                         <i class="fas fa-arrow-right-from-bracket mr-2"></i> العودة للخدمات
                     </button>
-                    <button id="logoutBtn" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300">تسجيل الخروج</button>
+                    <button id="logoutBtn" class="w-full text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300" style="background-color: var(--color-danger);">تسجيل الخروج</button>
                 </div>
             </nav>
 
@@ -131,7 +220,7 @@
                     <button id="hamburgerBtn" class="text-2xl text-gray-700 dark:text-gray-300" aria-label="فتح القائمة الجانبية">
                         <i class="fas fa-bars"></i>
                     </button>
-                    <h1 id="mobilePageTitle" class="text-lg font-bold text-cyan-600"></h1>
+                    <h1 id="mobilePageTitle" class="h3 text-cyan-600"></h1>
                 </header>
 
                 <div class="p-6 md:p-10 flex-1">
@@ -140,49 +229,67 @@
                         
                         <!-- Service-specific Dashboard -->
                         <div id="serviceDashboardContainer">
-                             <h1 class="text-3xl font-bold mb-6">لوحة معلومات الخدمة</h1>
+                             <h1 class="h1 mb-6">لوحة معلومات الخدمة</h1>
                              <div id="announcementsDisplay" class="mb-6"></div>
-                             <!-- [MODIFIED] Grid layout for service dashboard stats -->
-                             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-                                <div class="md:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex items-center gap-4">
-                                    <i class="fas fa-users text-4xl text-cyan-500"></i>
-                                    <div>
-                                        <p class="text-gray-500 dark:text-gray-400 text-sm">إجمالي الخدام</p>
-                                        <p id="totalServantsStat" class="text-3xl font-bold">0</p>
-                                    </div>
+
+                             
+                              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8"><!-- [unchanged wrapper] --></div> 
+                              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+                                <div id="totalServantsCard" class="col-span-1 md:col-span-2 lg:col-span-4 bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg flex items-center justify-between gap-6 cursor-pointer transition-transform hover:scale-[1.01]">
+                                <div class="flex items-center gap-5"> <i class="fas fa-users text-5xl md:text-6xl text-cyan-500"></i>
+                                 <div> <p class="text-gray-500 dark:text-gray-400 text-sm md:text-base">إجمالي الخدام</p> <p id="totalServantsStat" class="text-4xl md:text-5xl font-extrabold">0</p> </div> </div> 
+
+                                 <div class="hidden md:flex items-center gap-3 text-cyan-700 dark:text-cyan-300"> <i class="fas fa-chart-line"></i> <span class="text-sm md:text-base">نظرة عامة سريعة</span> </div> 
+                                 
+                                 </div> 
+                                  <div class="col-span-1 md:col-span-1 lg:col-span-2 bg-white dark:bg-gray-800 p-8 rounded-xl grow overflow-y-auto" style="max-height: 250px;"> 
+                                    <h3 class="font-bold text-pink-600 dark:text-pink-400 mb-2 text-lg flex-shrink-0">أعياد ميلاد قادمة</h3> 
+                                 <div id="upcomingBirthdayStat" class="overflow-y-auto flex-grow" style="max-height: 250px;"></div>
+                                  </div> <!-- END CHANGED --> <!-- CHANGED: غياب الجمعة (نصف الصف) --> 
+                                  <div class="col-span-1 md:col-span-1 lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col">
+                                    <div class="flex justify-between items-baseline mb-2"> <h3 class="font-bold text-red-600 dark:text-red-400 text-lg">غياب الجمعة الماضية</h3>
+                                     <div id="lastFridayAbsenceCount" class="font-bold text-lg"></div> </div> 
+                                     <div id="lastFridayAbsenceStat" class="text-sm text-gray-500 dark:text-gray-400 flex-grow"  style="max-height: 250px;"></div>
+                                      </div> <!-- END CHANGED -->
+
                                 </div>
-                                <div class="md:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col">
-                                    <h3 class="font-bold text-pink-600 dark:text-pink-400 mb-2 text-lg flex-shrink-0">أعياد ميلاد قادمة (خلال 30 يوم)</h3>
-                                    <div id="upcomingBirthdayStat" class="overflow-y-auto flex-grow" style="max-height: 100px;">
-                                        <!-- Birthday list will be populated here -->
+                             
+                                    <div id="lastFridayAbsenceStat" class="text-sm text-gray-500 dark:text-gray-400 flex-grow">
+                                        <!-- Absentee list will be populated here -->
                                     </div>
+                                    
                                 </div>
-                                <div class="md:col-span-4 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
-                                    <h3 class="font-bold text-gray-700 dark:text-gray-300 mb-2">الأنشطة المسجلة هذا الشهر</h3>
-                                    <div id="monthlyActivityLog" class="text-sm text-gray-500 dark:text-gray-400">
-                                        جاري تحميل البيانات...
+                                <div class="lg:col-span-4 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg mb-8">
+                                    
+                                    <h3 class="font-bold text-cyan-600 dark:text-cyan-400 mb-6 text-lg">حالة تسجيل أنشطة الجمعة الماضية</h3>
+                                    
+                                    <div id="lastFridayStatusContainer" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                                        <!-- Activity status will be populated here -->
                                     </div>
                                 </div>
                             </div>
                             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                           
+                               
                                 <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
-                                    <h2 class="text-xl font-bold mb-4">متوسط الحضور (آخر 30 يوم)</h2>
+                                    <h2 class="h2 mb-4">متوسط الحضور (آخر 30 يوم)</h2>
                                     <div class="relative h-80">
                                         <canvas id="homeAttendanceChart"></canvas>
                                     </div>
                                 </div>
                                 <div class="space-y-6">
                                     <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
-                                        <h2 class="text-xl font-bold mb-4">إجراءات سريعة</h2>
+                                        <h2 class="h2 mb-4">إجراءات سريعة</h2>
                                         <div class="space-y-3">
                                             <button id="quickAddServant" class="w-full text-left p-3 rounded-lg bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 hover:bg-green-200 dark:hover:bg-green-800 transition-colors"><i class="fas fa-user-plus w-6 mr-2"></i> إضافة خادم جديد</button>
                                             <button id="quickGoToAttendance" class="w-full text-left p-3 rounded-lg bg-cyan-100 dark:bg-cyan-900 text-cyan-800 dark:text-cyan-200 hover:bg-cyan-200 dark:hover:bg-cyan-800 transition-colors"><i class="fas fa-check-square w-6 mr-2"></i> تسجيل الحضور</button>
                                         </div>
                                     </div>
                                     <div id="backupRestoreSection" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
-                                        <h2 class="text-xl font-bold mb-4">النسخ الاحتياطي</h2>
+                                        <h2 class="h2 mb-4">النسخ الاحتياطي</h2>
                                         <div class="flex flex-col md:flex-row gap-3">
-                                            <button id="backupBtn" class="w-full flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-all flex items-center justify-center gap-2"><i class="fas fa-download"></i> حفظ</button>
+                                            <button id="backupBtn" class="w-full flex-1 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-all flex items-center justify-center gap-2" style="background-color: var(--color-info);"><i class="fas fa-download"></i> حفظ</button>
                                             <button id="restoreBtn" class="w-full flex-1 bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-all flex items-center justify-center gap-2"><i class="fas fa-upload"></i> استرجاع</button>
                                         </div>
                                     </div>
@@ -192,7 +299,7 @@
 
                         <!-- Admin-specific Dashboard (Secretary General) -->
                         <div id="adminDashboardContainer" class="hidden-view">
-                            <h1 class="text-3xl font-bold mb-6">لوحة المعلومات الشاملة (الأمين العام)</h1>
+                            <h1 class="h1 mb-6">لوحة المعلومات الشاملة (الأمين العام)</h1>
                             
                             <div id="kpiContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                 <!-- Top 2 KPIs will be injected here by JS -->
@@ -201,7 +308,7 @@
                             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
 
                                 <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col">
-                                    <h2 class="text-xl font-bold mb-4">قائمة كل الخدام</h2>
+                                    <h2 class="h2 mb-4">قائمة كل الخدام</h2>
                                     <div class="relative mb-4">
                                         <input type="text" id="adminSearchInput" placeholder="ابحث بالاسم أو الموبايل..." class="w-full p-3 pr-10 rounded-lg bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 focus:border-cyan-500 focus:outline-none">
                                         <i class="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
@@ -221,58 +328,62 @@
                                 </div>
 
                                 <div class="lg:col-span-1 space-y-6">
-                                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col" style="height: 55vh;">
-                                        <h2 class="text-xl font-bold mb-2 text-cyan-600 dark:text-cyan-400">متابعة تسجيل الحضور</h2>
-                                        <div id="attendanceFollowUpPanel" class="flex-grow flex flex-col overflow-hidden">
-                                            <!-- Content injected by JS will go here -->
+                                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                                        <h2 class="h2 mb-4">متوسط الحضور العام (آخر 30 يوم)</h2>
+                                        <div class="relative h-80"><canvas id="adminAttendanceChart"></canvas></div>
+                                    </div>
+                                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                                        <h2 class="h2 mb-4">لوحة الإعلانات المركزية</h2>
+                                        <div id="adminAnnouncementsList" class="space-y-3 max-h-40 overflow-y-auto mb-4 pr-2"></div>
+                                        <textarea id="newAnnouncementInput" class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700" placeholder="اكتب إعلانك الجديد هنا..."></textarea>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mt-4">توجيه الإعلان إلى:</label>
+                                        <div id="announcementTarget" class="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 h-32 overflow-y-auto space-y-2">
+                                            <!-- Checkboxes will be populated by JS -->
                                         </div>
+                                        <button id="addAnnouncementBtn" class="mt-3 w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-lg">إضافة إعلان</button>
                                     </div>
-
-                                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col">
-                                        <h2 class="text-xl font-bold mb-4">خدام بحاجة للمتابعة</h2>
-                                        <div id="followUpPanel" class="overflow-y-auto flex-grow space-y-2" style="max-height: 20vh;">
-                                            <!-- Follow-up list will be injected here -->
-                                        </div>
-                                    </div>
-
-                                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col">
-                                        <h2 class="text-xl font-bold mb-4">أعياد ميلاد قادمة (30 يوم)</h2>
-                                        <div id="birthdaysPanel" class="overflow-y-auto flex-grow space-y-2" style="max-height: 20vh;">
-                                            <!-- Birthdays list will be injected here -->
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-6">
-                                <div class="lg:col-span-3 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
-                                    <h2 class="text-xl font-bold mb-4">متوسط الحضور العام (آخر 30 يوم)</h2>
-                                    <div class="relative h-80"><canvas id="adminAttendanceChart"></canvas></div>
-                                </div>
-                                <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
-                                    <h2 class="text-xl font-bold mb-4">لوحة الإعلانات المركزية</h2>
-                                    <div id="adminAnnouncementsList" class="space-y-3 max-h-40 overflow-y-auto mb-4 pr-2"></div>
-                                    <textarea id="newAnnouncementInput" class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700" placeholder="اكتب إعلانك الجديد هنا..."></textarea>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mt-4">توجيه الإعلان إلى:</label>
-                                    <div id="announcementTarget" class="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 h-32 overflow-y-auto space-y-2">
-                                        <!-- Checkboxes will be populated by JS -->
-                                    </div>
-                                    <button id="addAnnouncementBtn" class="mt-3 w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-lg">إضافة إعلان</button>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
+                    <!-- [NEW] Page: Follow-up Page -->
+                    <div id="followUpPage" class="page-content hidden-view">
+                        <h1 class="h1 mb-6">صفحة المتابعة</h1>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col">
+                                <h2 class="h2 mb-2 text-cyan-600 dark:text-cyan-400">متابعة تسجيل الحضور</h2>
+                                <div id="attendanceFollowUpPanel" class="flex-grow flex flex-col overflow-hidden">
+                                    <!-- Content injected by JS will go here -->
+                                </div>
+                            </div>
+                            <div class="space-y-6">
+                                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col">
+                                    <h2 class="h2 mb-4">خدام بحاجة للمتابعة</h2>
+                                    <div id="followUpPanel" class="overflow-y-auto flex-grow space-y-2" style="max-height: 40vh;">
+                                        <!-- Follow-up list will be injected here -->
+                                    </div>
+                                </div>
+                                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col">
+                                    <h2 class="h2 mb-4 text-pink-600 dark:text-pink-400">أعياد ميلاد قادمة (30 يوم)</h2>
+                                    <div id="birthdaysPanel" class="overflow-y-auto flex-grow space-y-2" style="max-height: 40vh;">
+                                        <!-- Birthdays list will be injected here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Page: Servants Management -->
                     <div id="servantsPage" class="page-content hidden-view">
-                         <h1 class="text-3xl font-bold mb-6">إدارة الخدام</h1>
+                         <h1 class="h1 mb-6">إدارة الخدام</h1>
                          <div id="birthdayAlertsContainer" class="mb-6"></div>
                         <div id="servantsActions" class="flex flex-col md:flex-row gap-4 mb-6">
                             <div class="relative flex-grow">
                                 <input type="text" id="searchInput" placeholder="ابحث بالاسم أو الموبايل..." class="w-full p-3 pr-10 rounded-lg bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 focus:border-cyan-500 focus:outline-none">
                                 <i class="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                             </div>
-                            <button id="addManualBtn" class="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-5 rounded-lg shadow-md hover:shadow-lg transition-all"><i class="fas fa-plus mr-2"></i> إضافة خادم</button>
+                            <button id="addManualBtn" class="w-full md:w-auto text-white font-bold py-2 px-5 rounded-lg shadow-md hover:shadow-lg transition-all" style="background-color: var(--color-success);"><i class="fas fa-plus mr-2"></i> إضافة خادم</button>
                             <button id="importExcelBtn" class="w-full md:w-auto bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-5 rounded-lg shadow-md hover:shadow-lg transition-all"><i class="fas fa-file-excel mr-2"></i> استيراد Excel</button>
                         </div>
                         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-x-auto">
@@ -295,7 +406,7 @@
 
                     <!-- Page: Attendance -->
                     <div id="attendancePage" class="page-content hidden-view">
-                         <h1 class="text-3xl font-bold mb-6">تسجيل حضور الأنشطة</h1>
+                         <h1 class="h1 mb-6">تسجيل حضور الأنشطة</h1>
                          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                                 <div>
@@ -310,7 +421,7 @@
                             <div id="fridaysGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 mb-6"></div>
                             <div id="activityButtons" class="hidden-view grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-6"></div>
                             <div id="attendanceListContainer" class="hidden-view mt-6 border-t pt-6">
-                                <h3 id="attendanceListTitle" class="text-xl font-bold mb-4"></h3>
+                                <h3 id="attendanceListTitle" class="h3 mb-4"></h3>
                                 <div id="noActivitySection" class="mb-4 p-3 bg-yellow-100 dark:bg-yellow-800 border-r-4 border-yellow-500 text-yellow-800 dark:text-yellow-200 rounded-md">
                                     <label class="flex items-center cursor-pointer">
                                         <input type="checkbox" id="noActivityCheck" class="ml-3 h-5 w-5 rounded text-cyan-600 focus:ring-cyan-500">
@@ -319,14 +430,14 @@
                                     <textarea id="noActivityReason" placeholder="اكتب السبب أو الملاحظة هنا..." class="w-full p-2 mt-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 hidden"></textarea>
                                 </div>
                                 <div id="servantsChecklist" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-2"></div>
-                                <button id="saveActivityAttendanceBtn" class="mt-6 w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-5 rounded-lg shadow-md hover:shadow-lg transition-all"><i class="fas fa-save mr-2"></i> حفظ الحضور</button>
+                                <button id="saveActivityAttendanceBtn" class="mt-6 w-full text-white font-bold py-3 px-5 rounded-lg shadow-md hover:shadow-lg transition-all" style="background-color: var(--color-success);"><i class="fas fa-save mr-2"></i> حفظ الحضور</button>
                             </div>
                          </div>
                     </div>
 
                     <!-- Page: Reports -->
                     <div id="reportsPage" class="page-content hidden-view">
-                        <h1 class="text-3xl font-bold mb-6">التقارير والإحصائيات</h1>
+                        <h1 class="h1 mb-6">التقارير والإحصائيات</h1>
                         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
                             <div class="border-b pb-4 mb-4">
                                 <div id="reportTabs" class="flex border-b border-gray-200 dark:border-gray-700 mb-4">
@@ -392,6 +503,95 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- [RE-STYLED] Page: Activity Analysis with Filters -->
+                    <div id="activityAnalysisPage" class="page-content hidden-view">
+                        <h1 class="h1 mb-2">تحليل الغياب</h1>
+                        <p class="text-gray-500 dark:text-gray-400 mb-6">استخدم الفلاتر أدناه لعرض تقارير الغياب المخصصة.</p>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+                            <!-- Filters Section -->
+                            <div class="space-y-6">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label for="analysisServiceFilter" class="block mb-2 font-bold text-sm text-gray-700 dark:text-gray-300">الخدمة:</label>
+                                        <select id="analysisServiceFilter" class="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"></select>
+                                    </div>
+                                    <div>
+                                        <label for="analysisYearFilter" class="block mb-2 font-bold text-sm text-gray-700 dark:text-gray-300">السنة:</label>
+                                        <select id="analysisYearFilter" class="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"></select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <label class="block font-bold text-sm text-gray-700 dark:text-gray-300">الأشهر (اختر شهر أو أكثر):</label>
+                                        <div class="flex items-center">
+                                            <input id="selectAllMonths" type="checkbox" class="w-4 h-4 text-cyan-600 bg-gray-100 border-gray-300 rounded focus:ring-cyan-500 ml-2 cursor-pointer">
+                                            <label for="selectAllMonths" class="text-sm font-medium cursor-pointer">اختيار الكل</label>
+                                        </div>
+                                    </div>
+                                    <div id="analysisMonthCheckboxes" class="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-3">
+                                        <!-- Month checkboxes will be populated here -->
+                                    </div>
+                                </div>
+                                <div class="flex flex-col md:flex-row items-center justify-between gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                     <div class="flex items-center gap-3">
+                                        <label class="font-bold text-sm whitespace-nowrap">عرض النتيجة كـ:</label>
+                                        <div class="relative inline-block w-28 h-10 flex items-center justify-center">
+                                            <input type="checkbox" id="analysisModeToggle" class="absolute w-full h-full opacity-0 z-10 cursor-pointer"/>
+                                            <div class="w-full h-full bg-gray-300 dark:bg-gray-600 rounded-full shadow-inner"></div>
+                                            <div id="analysisModeLabel" class="absolute text-white font-bold transition-all duration-300 ease-in-out"></div>
+                                        </div>
+                                    </div>
+                                    <button id="generateAnalysisBtn" class="w-full md:w-auto bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2">
+                                        <i class="fas fa-cogs"></i>
+                                        <span>إنشاء التقرير</span>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Results Section -->
+                            <div id="analysisResultContainer" class="mt-8 border-t border-gray-200 dark:border-gray-700 pt-6">
+                                <!-- Analysis results will be injected here -->
+                            </div>
+                            
+                            <!-- Export Button -->
+                             <div id="exportAnalysisBtnContainer" class="flex justify-end mt-6 hidden-view">
+                                <button id="exportAnalysisBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg shadow-md transition-all flex items-center justify-center gap-2">
+                                    <i class="fas fa-file-image"></i>
+                                    <span>تصدير كصورة</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [NEW] Page: Messages -->
+                    <div id="messagesPage" class="page-content hidden-view">
+                        <!-- Admin View: Inbox -->
+                        <div id="adminMessagesContainer" class="hidden-view">
+                            <h1 class="h1 mb-6">صندوق الوارد</h1>
+                            <div id="receivedMessagesList" class="space-y-4">
+                                <!-- Messages will be populated here -->
+                            </div>
+                        </div>
+
+                        <!-- User View: Send Message -->
+                        <div id="userMessagesContainer" class="hidden-view">
+                            <h1 class="h1 mb-6">إرسال رسالة إلى الأمين العام</h1>
+                            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+                                <form id="sendMessageForm">
+                                    <textarea id="newMessageText" rows="6" class="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500" placeholder="اكتب رسالتك هنا..."></textarea>
+                                    <button id="sendMessageBtn" type="submit" class="mt-4 w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-5 rounded-lg shadow-md transition-all flex items-center justify-center gap-2">
+                                        <i class="fas fa-paper-plane"></i>
+                                        <span>إرسال</span>
+                                    </button>
+                                </form>
+                            </div>
+                            <h2 class="h2 mt-8 mb-4">الرسائل المرسلة</h2>
+                            <div id="sentMessagesList" class="space-y-3">
+                                <!-- Sent messages will be populated here -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </main>
         </div>
@@ -401,7 +601,7 @@
     <div id="loginModal" class="fixed inset-0 z-50 items-center justify-center hidden-view modal-backdrop">
         <div class="bg-white dark:bg-gray-800 w-11/12 md:max-w-md mx-auto rounded-xl shadow-lg z-50 p-8">
             <div class="flex justify-between items-center pb-3">
-                <h3 id="modalTitle" class="text-2xl font-bold"></h3>
+                <h3 id="modalTitle" class="h2"></h3>
                 <button class="close-modal-btn cursor-pointer z-50 text-2xl" aria-label="إغلاق النافذة">&times;</button>
             </div>
             <form id="loginForm" class="mt-4">
@@ -415,7 +615,7 @@
     <div id="manualEntryModal" class="fixed inset-0 z-50 items-center justify-center hidden-view modal-backdrop">
         <div class="bg-white dark:bg-gray-800 w-11/12 md:max-w-lg mx-auto rounded-xl shadow-lg z-50 p-8 max-h-[90vh] overflow-y-auto">
              <div class="flex justify-between items-center pb-3">
-                <h3 id="manualEntryModalTitle" class="text-2xl font-bold">إضافة خادم جديد</h3>
+                <h3 id="manualEntryModalTitle" class="h2">إضافة خادم جديد</h3>
                 <button class="close-modal-btn cursor-pointer z-50 text-2xl" aria-label="إغلاق النافذة">&times;</button>
             </div>
             <form id="manualEntryForm" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -434,14 +634,14 @@
                     <input type="file" id="servantImageFile" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-cyan-50 file:text-cyan-700 hover:file:bg-cyan-100">
                     <img id="imagePreview" src="" alt="Image Preview" class="mt-4 rounded-lg max-h-40 hidden"/>
                 </div>
-                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg md:col-span-2">حفظ البيانات</button>
+                <button type="submit" class="w-full text-white font-bold py-3 px-4 rounded-lg md:col-span-2" style="background-color: var(--color-success);">حفظ البيانات</button>
             </form>
         </div>
     </div>
     <div id="importModal" class="fixed inset-0 z-50 items-center justify-center hidden-view modal-backdrop">
         <div class="bg-white dark:bg-gray-800 w-11/12 md:max-w-md mx-auto rounded-xl shadow-lg z-50 p-8">
             <div class="flex justify-between items-center pb-3">
-                <h3 class="text-2xl font-bold">استيراد من Excel</h3>
+                <h3 class="h2">استيراد من Excel</h3>
                 <button class="close-modal-btn cursor-pointer z-50 text-2xl" aria-label="إغلاق النافذة">&times;</button>
             </div>
             <form id="importForm" class="mt-4">
@@ -453,22 +653,47 @@
     </div>
     <div id="confirmModal" class="fixed inset-0 z-50 items-center justify-center hidden-view modal-backdrop">
         <div class="bg-white dark:bg-gray-800 w-11/12 md:max-w-md mx-auto rounded-xl shadow-lg z-50 p-8">
-            <h3 id="confirmModalTitle" class="text-xl font-bold mb-4">تأكيد الإجراء</h3>
+            <h3 id="confirmModalTitle" class="h3 mb-4">تأكيد الإجراء</h3>
             <p id="confirmModalBody" class="mb-6">هل أنت متأكد من أنك تريد المتابعة؟</p>
             <div class="flex justify-end gap-4">
                 <button id="confirmModalCancelBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded-lg">إلغاء</button>
-                <button id="confirmModalConfirmBtn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg">تأكيد</button>
+                <button id="confirmModalConfirmBtn" class="text-white font-bold py-2 px-6 rounded-lg" style="background-color: var(--color-danger);">تأكيد</button>
             </div>
         </div>
     </div>
     <div id="unifiedProfileModal" class="fixed inset-0 z-50 items-center justify-center hidden-view modal-backdrop">
         <div class="bg-white dark:bg-gray-800 w-11/12 md:max-w-3xl mx-auto rounded-xl shadow-lg z-50 p-8 max-h-[90vh] overflow-y-auto">
              <div class="flex justify-between items-center pb-3 border-b mb-4">
-                <h3 id="unifiedProfileModalTitle" class="text-2xl font-bold">الملف الشخصي الموحد</h3>
+                <h3 id="unifiedProfileModalTitle" class="h2">الملف الشخصي الموحد</h3>
                 <button class="close-modal-btn cursor-pointer z-50 text-2xl" aria-label="إغلاق النافذة">&times;</button>
             </div>
             <div id="unifiedProfileModalBody">
                 <!-- Profile content will be injected here -->
+            </div>
+        </div>
+    </div>
+    <div id="activityAttendeesModal" class="fixed inset-0 z-50 items-center justify-center hidden-view modal-backdrop">
+        <div class="bg-white dark:bg-gray-800 w-11/12 md:max-w-md mx-auto rounded-xl shadow-lg z-50 p-8 max-h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center pb-3 border-b mb-4">
+                <h3 id="activityAttendeesModalTitle" class="h2"></h3>
+                <button class="close-modal-btn cursor-pointer z-50 text-2xl" aria-label="إغلاق النافذة">&times;</button>
+            </div>
+            <div id="activityAttendeesModalBody" class="overflow-y-auto">
+                <!-- Attendee list will be injected here -->
+            </div>
+        </div>
+    </div>
+    <div id="messageViewModal" class="fixed inset-0 z-50 items-center justify-center hidden-view modal-backdrop">
+        <div class="bg-white dark:bg-gray-800 w-11/12 md:max-w-lg mx-auto rounded-xl shadow-lg z-50 p-8 max-h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center pb-3 border-b mb-4">
+                <h3 id="messageViewModalTitle" class="h2"></h3>
+                <button class="close-modal-btn cursor-pointer z-50 text-2xl" aria-label="إغلاق النافذة">&times;</button>
+            </div>
+            <div id="messageViewModalBody" class="overflow-y-auto flex-grow">
+                <!-- Message content will be injected here -->
+            </div>
+            <div class="pt-4 border-t mt-4">
+                <button id="messageViewModalCloseBtn" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg">إغلاق</button>
             </div>
         </div>
     </div>
@@ -478,6 +703,30 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, setDoc, getDoc, getDocs, updateDoc, query, where, writeBatch, orderBy, serverTimestamp, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- THEME MANAGEMENT (RUNS IMMEDIATELY) ---
+        const themeCheckbox = document.getElementById('theme-checkbox');
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+                if(themeCheckbox) themeCheckbox.checked = true;
+            } else {
+                document.documentElement.classList.remove('dark');
+                if(themeCheckbox) themeCheckbox.checked = false;
+            }
+        }
+        function toggleTheme() {
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme);
+        }
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            applyTheme(savedTheme);
+        } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            applyTheme('dark');
+        }
 
         // ==================================================================
         // FILE: config.js (Application Configuration)
@@ -515,7 +764,7 @@
 
         // --- GLOBAL STATE ---
         let currentServiceName = '';
-        let db, auth, userId, servantsUnsubscribe = null, announcementsUnsubscribe = null;
+        let db, auth, userId, servantsUnsubscribe = null, announcementsUnsubscribe = null, messagesUnsubscribe = null;
         let servantsCache = [];
         let attendanceYearCache = {}; 
         let currentActivity = '';
@@ -527,7 +776,7 @@
         let isLocalMode = false;
         // Chart instances
         let reportChart1 = null, reportChart2 = null, homeChart = null;
-        let adminChart = null, comparisonChart = null, profileChart = null;
+        let adminChart = null, comparisonChart = null, profileChart = null, activityComparisonChart = null;
         
         let authReadyPromiseResolver;
         const authReady = new Promise(resolve => {
@@ -634,7 +883,7 @@
                 const card = document.createElement('div');
                 card.className = `service-card bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg hover:shadow-2xl hover:-translate-y-1 transform transition-all duration-300 cursor-pointer flex flex-col items-center text-center border-2 border-transparent hover:ring-4 hover:ring-offset-2 hover:ring-${service.color}-400 dark:hover:ring-offset-gray-900`;
                 card.dataset.serviceName = service.name;
-                card.innerHTML = `<div class="text-5xl mb-4 text-${service.color}-500">${service.icon}</div><h3 class="text-xl font-bold">${service.name}</h3>`;
+                card.innerHTML = `<div class="text-5xl mb-4 text-${service.color}-500">${service.icon}</div><h3 class="h3">${service.name}</h3>`;
                 DOMElements.servicesGrid.appendChild(card);
             });
         }
@@ -647,6 +896,8 @@
             
             DOMElements.sidebarLinks.querySelector('[data-page="servantsPage"]').classList.toggle('hidden-view', isGeneralSecretaryMode);
             DOMElements.sidebarLinks.querySelector('[data-page="attendancePage"]').classList.toggle('hidden-view', isGeneralSecretaryMode);
+            DOMElements.activityAnalysisLink.classList.toggle('hidden-view', !isGeneralSecretaryMode);
+            DOMElements.followUpLink.classList.toggle('hidden-view', !isGeneralSecretaryMode);
             
             showLoading(true);
             if (isGeneralSecretaryMode) {
@@ -654,6 +905,7 @@
                 populateAnnouncementTargetSelector();
                 await loadAllServicesData();
                 listenForAnnouncements();
+                listenForMessages();
                 switchPage('homePage');
             } else {
                 await loadServants();
@@ -670,6 +922,7 @@
             currentServiceName = '';
             if (servantsUnsubscribe) servantsUnsubscribe();
             if (announcementsUnsubscribe) announcementsUnsubscribe();
+            if (messagesUnsubscribe) messagesUnsubscribe();
             servantsCache = [];
             attendanceYearCache = {};
             isGeneralSecretaryMode = false;
@@ -677,6 +930,8 @@
             allAttendanceCache = [];
             DOMElements.sidebarLinks.querySelector('[data-page="servantsPage"]').classList.remove('hidden-view');
             DOMElements.sidebarLinks.querySelector('[data-page="attendancePage"]').classList.remove('hidden-view');
+            DOMElements.activityAnalysisLink.classList.add('hidden-view');
+            DOMElements.followUpLink.classList.add('hidden-view');
         }
         
         async function switchPage(pageId) {
@@ -686,7 +941,7 @@
             const activeLink = DOMElements.sidebarLinks.querySelector(`.sidebar-link[data-page="${pageId}"]`);
             if (activeLink) {
                 activeLink.classList.add('active');
-                DOMElements.mobilePageTitle.textContent = activeLink.innerText;
+                DOMElements.mobilePageTitle.textContent = activeLink.innerText.replace(/\d+/g, '').trim();
             }
 
             if (window.innerWidth < 768) {
@@ -695,11 +950,12 @@
             }
             
             if (pageId === 'homePage') updateHomePageDashboard();
+            if (pageId === 'followUpPage') updateFollowUpPage();
             if (pageId === 'servantsPage') displayUpcomingBirthdays();
             if (pageId === 'attendancePage' && !isGeneralSecretaryMode) loadAttendancePage();
-            if (pageId === 'reportsPage') {
-                loadReportsPage();
-            }
+            if (pageId === 'reportsPage') loadReportsPage();
+            if (pageId === 'activityAnalysisPage') initializeActivityAnalysisPage();
+            if (pageId === 'messagesPage') loadMessagesPage();
         }
 
         // --- DATA FETCHING ---
@@ -778,9 +1034,11 @@
         async function loadAllServicesData() {
             await authReady;
             showLoading(true);
+            allServantsCache = [];
+            allAttendanceCache = [];
             const servicesToFetch = services.filter(s => s.name !== 'الامين العام');
             
-            const fetchPromises = servicesToFetch.map(async (service) => {
+            for (const service of servicesToFetch) {
                 const serviceName = service.name;
                 const [serviceServants, serviceAttendance] = await Promise.all([
                     fetchData('servants', serviceName),
@@ -788,21 +1046,17 @@
                 ]);
                 const attendanceArray = Object.entries(serviceAttendance).map(([date, data]) => ({ date, ...data, serviceName }));
                 serviceServants.forEach(s => s.serviceName = serviceName);
-                return { serviceServants, serviceAttendance: attendanceArray };
-            });
+                
+                allServantsCache.push(...serviceServants);
+                allAttendanceCache.push(...attendanceArray);
 
-            try {
-                const results = await Promise.all(fetchPromises);
-                allServantsCache = results.flatMap(r => r.serviceServants);
-                allAttendanceCache = results.flatMap(r => r.serviceAttendance);
-                allServantsCache.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
-            } catch (error) {
-                console.error("Error loading all services data:", error);
-                showMessage("فشل تحميل البيانات المجمعة.", true);
-            } finally {
-                showLoading(false);
+                renderAdminServantsTable(allServantsCache.sort((a, b) => a.name.localeCompare(b.name, 'ar')));
+                updateAdminDashboard();
             }
+            
+            showLoading(false);
         }
+
 
         // --- SERVANTS FUNCTIONS ---
         function renderServantsTable(servantsToRender) {
@@ -865,7 +1119,7 @@
                 qualification: DOMElements.manualEntryForm.querySelector('#servantQualification').value,
                 job: DOMElements.manualEntryForm.querySelector('#servantJob').value,
                 confessionFather: DOMElements.manualEntryForm.querySelector('#servantConfessionFather').value,
-                imageUrl: DOMElements.imagePreview.src.startsWith('data:image') ? DOMElements.imagePreview.src : (servantId ? servantsCache.find(s => s.id === servantId).imageUrl : null)
+                imageUrl: DOMElements.imagePreview.src
             };
             
             showLoading(true);
@@ -1264,7 +1518,7 @@
                 });
             });
 
-            let reportHTML = `<h3 class="text-xl font-bold mb-4">تقرير الحضور لـ: ${servant.name}</h3><div class="grid grid-cols-2 md:grid-cols-3 gap-4">`;
+            let reportHTML = `<h3 class="h3 mb-4">تقرير الحضور لـ: ${servant.name}</h3><div class="grid grid-cols-2 md:grid-cols-3 gap-4">`;
             let percentages = [];
             activities.forEach(activity => {
                 const total = reportData.total[activity.key];
@@ -1315,7 +1569,7 @@
         
         function displayAllServantsAverageReport(data, servants) { 
             DOMElements.reportContent.innerHTML = '';
-            let reportHTML = `<h3 class="text-xl font-bold mb-4">متوسط الحضور لكل الأنشطة</h3>`;
+            let reportHTML = `<h3 class="h3 mb-4">متوسط الحضور لكل الأنشطة</h3>`;
             reportHTML += '<div class="grid grid-cols-2 md:grid-cols-3 gap-4">';
             
             const activityTotals = {}, activityCounts = {};
@@ -1733,17 +1987,27 @@
                 });
 
             } else {
-                // [MODIFIED] Logic for updated service dashboard
                 DOMElements.totalServantsStat.textContent = servantsCache.length;
                 const birthdayContainer = DOMElements.upcomingBirthdayStat;
                 const upcomingBirthdays = getUpcomingBirthdays(servantsCache, 100);
 
                 if (upcomingBirthdays.length > 0) {
-                    birthdayContainer.innerHTML = '<ul class="space-y-2"></ul>';
-                    const ul = birthdayContainer.querySelector('ul');
+                    birthdayContainer.innerHTML = '<div class="space-y-2"></div>';
+                    const containerDiv = birthdayContainer.querySelector('div');
                     upcomingBirthdays.forEach(person => {
                         const dayText = person.daysUntil === 0 ? 'اليوم!' : `بعد ${person.daysUntil} يوم`;
-                        ul.innerHTML += `<li class="flex justify-between items-center text-sm"><span><strong>${person.name}</strong></span><span class="text-gray-500">${person.date} (${dayText})</span></li>`;
+                        containerDiv.innerHTML += `
+                            <div class="flex items-center justify-between p-2 rounded-lg transition-colors hover:bg-pink-50 dark:hover:bg-pink-900/30">
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-birthday-cake text-pink-400"></i>
+                                    <div>
+                                        <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm whitespace-nowrap">${person.name}</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">${person.date}</p>
+                                    </div>
+                                </div>
+                                <span class="text-xs font-bold text-white bg-pink-500 rounded-full px-2 py-1">${dayText}</span>
+                            </div>
+                        `;
                     });
                 } else {
                     birthdayContainer.innerHTML = '<p class="text-gray-500 text-center pt-4">لا توجد أعياد ميلاد قادمة.</p>';
@@ -1789,29 +2053,75 @@
                     options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100, ticks: { callback: value => value + '%' } } }, plugins: { legend: { display: false } } }
                 });
 
-                const monthlyLogContainer = DOMElements.monthlyActivityLog;
-                monthlyLogContainer.innerHTML = '';
-                const today = new Date();
-                const monthlyAttendance = attendanceData.filter(item => new Date(item.date).getMonth() === today.getMonth() && new Date(item.date).getFullYear() === today.getFullYear());
-
-                if (monthlyAttendance.length === 0) {
-                    monthlyLogContainer.innerHTML = '<p class="text-gray-400">لا توجد أنشطة مسجلة لهذا الشهر.</p>';
-                } else {
-                    let logHTML = '<ul class="space-y-2 max-h-32 overflow-y-auto">';
-                    monthlyAttendance.sort((a, b) => new Date(b.date) - new Date(a.date));
-                    monthlyAttendance.forEach(day => {
-                        const formattedDate = new Date(day.date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long' });
-                        activities.forEach(activity => {
-                            const activityData = day[activity.key];
-                            if (activityData) {
-                                let statusText = activityData.note ? `تم إلغاء نشاط <strong>${activity.name}</strong>.` : (activityData.attendees && activityData.attendees.length > 0) ? `تم تسجيل حضور <strong>${activity.name}</strong> لـ ${activityData.attendees.length} خدام.` : '';
-                                if (statusText) logHTML += `<li class="flex items-start"><i class="fas fa-check-circle text-cyan-500 mt-1 mr-2"></i><span>يوم <strong>${formattedDate}</strong>: ${statusText}</span></li>`;
-                            }
-                        });
-                    });
-                    logHTML += '</ul>';
-                    monthlyLogContainer.innerHTML = logHTML;
+                const currentYear = new Date().getFullYear();
+                const isCacheValid = attendanceYearCache && Object.keys(attendanceYearCache).length > 0 && Object.values(attendanceYearCache)[0].year === currentYear;
+                if (!isCacheValid) {
+                    await loadAttendanceForYear(currentYear);
                 }
+
+                const lastFridayAbsenceContainer = DOMElements.lastFridayAbsenceStat;
+                const lastFridayAbsenceCountContainer = DOMElements.lastFridayAbsenceCount;
+                const { dateString: lastFridayDateString } = getLastFriday();
+                const lastFridayData = attendanceYearCache[lastFridayDateString];
+
+                lastFridayAbsenceCountContainer.innerHTML = '';
+                lastFridayAbsenceContainer.innerHTML = '';
+
+                if (lastFridayData && lastFridayData.service) {
+                    const serviceActivity = lastFridayData.service;
+                    if (serviceActivity.note) {
+                        lastFridayAbsenceContainer.innerHTML = `<p class="text-yellow-600 dark:text-yellow-400 font-semibold">تم إلغاء الخدمة يوم الجمعة الماضية.</p>`;
+                    } else {
+                        const attendees = new Set(serviceActivity.attendees || []);
+                        const absentees = servantsCache.filter(servant => !attendees.has(servant.id));
+lastFridayAbsenceCountContainer.innerHTML = `
+    <span class="font-bold text-xl ${absentees.length > 0 ? 'text-red-500' : 'text-green-500'}">${absentees.length}</span>
+    <span class="text-gray-500"> / ${servantsCache.length}</span>
+`;
+
+if (absentees.length > 0) {
+    let listHTML = `<div class="overflow-y-auto" style="max-height: 140px;"><ul class="pr-2">`; // تم إزالة space-y-1
+    absentees.forEach(servant => {
+        listHTML += `<li class="font-semibold text-red-700 dark:text-red-400 flex items-center p-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"><i class="fas fa-times-circle text-red-400 ml-3 flex-shrink-0"></i><span class="truncate">${servant.name}</span></li>`;
+    });
+    listHTML += `</ul></div>`;
+    lastFridayAbsenceContainer.innerHTML = listHTML;
+} else {
+    lastFridayAbsenceContainer.innerHTML = `<p class="text-green-600 dark:text-green-400 font-semibold flex items-center mt-2"><i class="fas fa-check-circle ml-2"></i>لا يوجد غياب! كل الخدام حضروا الخدمة.</p>`;
+}   }
+                } else {
+                    lastFridayAbsenceContainer.innerHTML = '<p class="text-gray-400">لم يتم تسجيل حضور الخدمة للجمعة الماضية بعد.</p>';
+                }
+                const lastFridayStatusContainer = DOMElements.lastFridayStatusContainer;
+                lastFridayStatusContainer.innerHTML = '';
+                activities.forEach(act => {
+                    const activityData = lastFridayData ? lastFridayData[act.key] : undefined;
+                    let statusClass = 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300';
+                    let statusIcon = 'fa-times-circle';
+                    let statusText = 'لم يسجل';
+
+                    if (activityData) {
+                        if (activityData.note !== null && activityData.note !== undefined) {
+                            statusClass = 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300';
+                            statusIcon = 'fa-exclamation-circle';
+                            statusText = 'ملغى';
+                        } else {
+                            statusClass = 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300';
+                            statusIcon = 'fa-check-circle';
+                            const attendeesCount = activityData.attendees ? activityData.attendees.length : 0;
+                            const totalServants = servantsCache.length;
+                            statusText = `مسجل (${attendeesCount}/${totalServants})`;
+                        }
+                    }
+
+                    lastFridayStatusContainer.innerHTML += `
+                        <div data-activity-key="${act.key}" class="activity-status-card p-3 rounded-lg flex flex-col items-center justify-center text-center transition-transform hover:scale-105 cursor-pointer ${statusClass}">
+                            <i class="fas ${act.icon} text-2xl mb-2"></i>
+                            <p class="font-bold text-sm">${act.name}</p>
+                            <p class="text-sm font-semibold flex items-center gap-1 mt-1"><i class="fas ${statusIcon}"></i> ${statusText}</p>
+                        </div>
+                    `;
+                });
             }
         }
 
@@ -1831,6 +2141,53 @@
                     <td class="p-3">${val(servant.mobile)}</td>`;
                 DOMElements.adminServantsTableBody.appendChild(row);
             });
+        }
+        
+        function showActivityAttendees(activityKey) {
+            const { dateString: lastFridayDateString } = getLastFriday();
+            const lastFridayData = attendanceYearCache[lastFridayDateString];
+            const activity = activityMap.get(activityKey);
+
+            if (!activity) return;
+
+            DOMElements.activityAttendeesModalTitle.textContent = `حضور: ${activity.name}`;
+            const body = DOMElements.activityAttendeesModalBody;
+            body.innerHTML = ''; // Clear previous content
+
+            if (!lastFridayData || !lastFridayData[activityKey]) {
+                body.innerHTML = '<p class="text-gray-500 text-center">لم يتم تسجيل هذا النشاط بعد.</p>';
+                openModal(DOMElements.activityAttendeesModal);
+                return;
+            }
+
+            const activityData = lastFridayData[activityKey];
+
+            if (activityData.note) {
+                body.innerHTML = `<p class="text-yellow-600 dark:text-yellow-400 text-center font-semibold">تم إلغاء هذا النشاط. <br> السبب: ${activityData.note}</p>`;
+                openModal(DOMElements.activityAttendeesModal);
+                return;
+            }
+
+            const attendeeIds = new Set(activityData.attendees || []);
+            if (attendeeIds.size === 0) {
+                body.innerHTML = '<p class="text-gray-500 text-center">لم يسجل حضور لأي خادم في هذا النشاط.</p>';
+                openModal(DOMElements.activityAttendeesModal);
+                return;
+            }
+
+            const attendees = servantsCache.filter(s => attendeeIds.has(s.id));
+            
+            const list = document.createElement('ul');
+            list.className = 'space-y-2';
+            attendees.forEach(servant => {
+                const li = document.createElement('li');
+                li.className = 'p-2 bg-gray-100 dark:bg-gray-700 rounded-md flex items-center gap-3';
+                li.innerHTML = `<i class="fas fa-user-check text-green-500"></i> <span class="font-semibold">${servant.name}</span>`;
+                list.appendChild(li);
+            });
+            body.appendChild(list);
+
+            openModal(DOMElements.activityAttendeesModal);
         }
 
 
@@ -1905,6 +2262,15 @@
                     showUnifiedProfile(e.target.dataset.servantId);
                 }
             });
+            DOMElements.totalServantsCard.addEventListener('click', () => switchPage('servantsPage'));
+            DOMElements.lastFridayStatusContainer.addEventListener('click', (e) => {
+                const card = e.target.closest('.activity-status-card');
+                if (card) {
+                    const activityKey = card.dataset.activityKey;
+                    showActivityAttendees(activityKey);
+                }
+            });
+
 
             // Servants Page Listeners
             DOMElements.searchInput.addEventListener('input', (e) => {
@@ -1983,12 +2349,41 @@
                 if (file) {
                     const reader = new FileReader();
                     reader.onload = (event) => {
-                        DOMElements.imagePreview.src = event.target.result;
-                        DOMElements.imagePreview.classList.remove('hidden');
+                        const img = new Image();
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            const MAX_WIDTH = 300;
+                            const MAX_HEIGHT = 300;
+                            let width = img.width;
+                            let height = img.height;
+
+                            if (width > height) {
+                                if (width > MAX_WIDTH) {
+                                    height *= MAX_WIDTH / width;
+                                    width = MAX_WIDTH;
+                                }
+                            } else {
+                                if (height > MAX_HEIGHT) {
+                                    width *= MAX_HEIGHT / height;
+                                    height = MAX_HEIGHT;
+                                }
+                            }
+                            canvas.width = width;
+                            canvas.height = height;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, width, height);
+                            
+                            const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                            
+                            DOMElements.imagePreview.src = dataUrl;
+                            DOMElements.imagePreview.classList.remove('hidden');
+                        }
+                        img.src = event.target.result;
                     };
                     reader.readAsDataURL(file);
                 }
             });
+
 
             // Attendance Page Listeners
             DOMElements.yearSelector.addEventListener('change', async () => {
@@ -2075,6 +2470,18 @@
             DOMElements.exportPngBtn.addEventListener('click', exportAsImage);
             DOMElements.exportPdfBtn.addEventListener('click', exportAsPdf);
             
+            // Messages Page Listeners
+            DOMElements.sendMessageForm.addEventListener('submit', sendMessage);
+            DOMElements.messageViewModalCloseBtn.addEventListener('click', () => closeModal(DOMElements.messageViewModal));
+
+
+            // Activity Analysis Page Listeners
+            DOMElements.generateAnalysisBtn.addEventListener('click', generateAbsenceAnalysis);
+            DOMElements.exportAnalysisBtn.addEventListener('click', exportAnalysisAsImage);
+
+            // Theme Toggle Listener
+            DOMElements.themeCheckbox.addEventListener('change', toggleTheme);
+
             // Mobile Sidebar Listeners
             DOMElements.hamburgerBtn.addEventListener('click', () => {
                 DOMElements.sidebar.classList.remove('translate-x-full');
@@ -2411,6 +2818,10 @@
         }
 
         function updateAdminDashboard() {
+            renderAdminKPIs();
+        }
+
+        function updateFollowUpPage() {
             const servantAttendanceSummary = {};
             allServantsCache.forEach(s => servantAttendanceSummary[s.id] = { attended: 0, possible: 0, name: s.name, service: s.serviceName });
             
@@ -2432,8 +2843,6 @@
                 });
             });
 
-            // --- Render Components ---
-            renderAdminKPIs();
             renderAttendanceFollowUpPanel();
             renderFollowUpPanel(servantAttendanceSummary);
             renderBirthdaysPanel();
@@ -2490,32 +2899,40 @@
 
             const val = (data) => data || 'غير متوفر';
             const body = `
-                <div class="flex flex-col md:flex-row gap-8">
-                    <div class="flex-shrink-0 text-center md:w-1/3">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="md:col-span-1 text-center">
                         <img src="${servant.imageUrl || 'https://placehold.co/120x120/E2E8F0/4A5568?text=?'}" class="w-32 h-32 rounded-full mx-auto object-cover border-4 border-cyan-500 shadow-lg">
-                        <h4 class="text-xl font-bold mt-3">${val(servant.name)}</h4>
+                        <h4 class="h3 mt-3">${val(servant.name)}</h4>
                         <p class="text-gray-500">${val(servant.serviceName)}</p>
                     </div>
-                    <div class="flex-grow md:w-2/3">
-                        <div class="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
-                            <p><strong><i class="fas fa-mobile-alt w-5 text-cyan-600"></i> الموبايل:</strong> ${val(servant.mobile)}</p>
-                            <p><strong><i class="fas fa-birthday-cake w-5 text-cyan-600"></i> ت. الميلاد:</strong> ${val(servant.dob)}</p>
-                            <p class="col-span-2"><strong><i class="fas fa-id-card w-5 text-cyan-600"></i> الرقم القومي:</strong> ${val(servant.nationalId)}</p>
-                            <p><strong><i class="fas fa-briefcase w-5 text-cyan-600"></i> الوظيفة:</strong> ${val(servant.job)}</p>
-                            <p><strong><i class="fas fa-graduation-cap w-5 text-cyan-600"></i> المؤهل:</strong> ${val(servant.qualification)}</p>
-                            <p class="col-span-2"><strong><i class="fas fa-map-marker-alt w-5 text-cyan-600"></i> العنوان:</strong> ${val(servant.address)}</p>
-                            <p class="col-span-2"><strong><i class="fas fa-cross w-5 text-cyan-600"></i> أب الاعتراف:</strong> ${val(servant.confessionFather)}</p>
+                    <div class="md:col-span-2 space-y-4">
+                        <div>
+                            <h3 class="h3 border-b pb-2 mb-3">المعلومات الشخصية</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
+                                <p class="flex items-center"><i class="fas fa-mobile-alt w-5 ml-2 text-cyan-600"></i><strong>الموبايل:</strong><span class="mr-2">${val(servant.mobile)}</span></p>
+                                <p class="flex items-center"><i class="fas fa-birthday-cake w-5 ml-2 text-cyan-600"></i><strong>ت. الميلاد:</strong><span class="mr-2">${val(servant.dob)}</span></p>
+                                <p class="flex items-center col-span-2"><i class="fas fa-id-card w-5 ml-2 text-cyan-600"></i><strong>الرقم القومي:</strong><span class="mr-2">${val(servant.nationalId)}</span></p>
+                                <p class="flex items-center col-span-2"><i class="fas fa-map-marker-alt w-5 ml-2 text-cyan-600"></i><strong>العنوان:</strong><span class="mr-2">${val(servant.address)}</span></p>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="h3 border-b pb-2 mb-3">بيانات الخدمة</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
+                                <p class="flex items-center"><i class="fas fa-briefcase w-5 ml-2 text-cyan-600"></i><strong>الوظيفة:</strong><span class="mr-2">${val(servant.job)}</span></p>
+                                <p class="flex items-center"><i class="fas fa-graduation-cap w-5 ml-2 text-cyan-600"></i><strong>المؤهل:</strong><span class="mr-2">${val(servant.qualification)}</span></p>
+                                <p class="flex items-center col-span-2"><i class="fas fa-cross w-5 ml-2 text-cyan-600"></i><strong>أب الاعتراف:</strong><span class="mr-2">${val(servant.confessionFather)}</span></p>
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div class="mt-6 border-t dark:border-gray-700 pt-4">
-                    <h5 class="font-bold mb-3">ملخص الحضور العام</h5>
+                    <h3 class="h3 mb-3">ملخص الحضور العام</h3>
                     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                         ${breakdownHTML}
                     </div>
                 </div>
                  <div class="mt-6 border-t dark:border-gray-700 pt-4">
-                    <h5 class="font-bold mb-2">معدل الحضور الشهري (آخر 6 أشهر)</h5>
+                    <h3 class="h3 mb-2">معدل الحضور الشهري (آخر 3 أشهر)</h3>
                     <div class="relative h-48"><canvas id="profileAttendanceChart"></canvas></div>
                 </div>
             `;
@@ -2529,7 +2946,7 @@
             const monthlyData = {};
             const monthLabels = [];
             
-            for (let i = 5; i >= 0; i--) {
+            for (let i = 2; i >= 0; i--) {
                 const d = new Date();
                 d.setMonth(d.getMonth() - i);
                 const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
@@ -2644,6 +3061,264 @@
                 }
             });
         }
+        
+        // --- [FIXED] ACTIVITY ANALYSIS PAGE FUNCTIONS ---
+
+        function initializeActivityAnalysisPage() {
+            if (!isGeneralSecretaryMode) return;
+            DOMElements.analysisResultContainer.innerHTML = '<p class="text-gray-500 text-center p-4">الرجاء استخدام الفلاتر أعلاه لإنشاء تقرير.</p>';
+            DOMElements.exportAnalysisBtnContainer.classList.add('hidden-view');
+        }
+
+        async function generateAbsenceAnalysis() {
+            showLoading(true);
+            
+            const selectedService = DOMElements.analysisServiceFilter.value;
+            const selectedYear = DOMElements.analysisYearFilter.value;
+            const selectedMonths = Array.from(DOMElements.analysisMonthCheckboxes.querySelectorAll('input:checked')).map(cb => parseInt(cb.value));
+            const isPercentageMode = DOMElements.analysisModeToggle.checked;
+
+            if (selectedMonths.length === 0) {
+                showMessage('الرجاء اختيار شهر واحد على الأقل.', true);
+                showLoading(false);
+                return;
+            }
+
+            let sourceServants = allServantsCache;
+            if (selectedService !== 'all') {
+                sourceServants = allServantsCache.filter(s => s.serviceName === selectedService);
+            }
+
+            const absenceData = {};
+            sourceServants.forEach(s => {
+                absenceData[s.id] = { name: s.name, serviceName: s.serviceName, absences: 0, totalMeetings: 0 };
+            });
+
+            const filteredAttendance = allAttendanceCache.filter(rec => {
+                const recDate = new Date(rec.date);
+                const recYear = recDate.getFullYear();
+                const recMonth = recDate.getMonth() + 1;
+                
+                const serviceMatch = (selectedService === 'all' || rec.serviceName === selectedService);
+                const yearMatch = recYear == selectedYear;
+                const monthMatch = selectedMonths.includes(recMonth);
+
+                return serviceMatch && yearMatch && monthMatch;
+            });
+
+            filteredAttendance.forEach(day => {
+                const serviceServantsOnDate = sourceServants.filter(s => s.serviceName === day.serviceName);
+                
+                const activityData = day.service; // Analyze absence from the main 'service' activity
+                if (activityData && (activityData.note === null || activityData.note === undefined)) {
+                    const attendees = new Set(activityData.attendees || []);
+                    serviceServantsOnDate.forEach(servant => {
+                        if (absenceData[servant.id]) {
+                            absenceData[servant.id].totalMeetings++;
+                            if (!attendees.has(servant.id)) {
+                                absenceData[servant.id].absences++;
+                            }
+                        }
+                    });
+                }
+            });
+
+            const results = Object.values(absenceData)
+                .map(data => ({
+                    ...data,
+                    value: isPercentageMode 
+                        ? (data.totalMeetings > 0 ? ((data.absences / data.totalMeetings) * 100) : 0)
+                        : data.absences
+                }))
+                .filter(data => data.value > 0)
+                .sort((a, b) => b.value - a.value);
+
+            renderAbsenceAnalysis(results, isPercentageMode);
+            showLoading(false);
+        }
+
+        function renderAbsenceAnalysis(results, isPercentageMode) {
+            const container = DOMElements.analysisResultContainer;
+            container.innerHTML = '';
+
+            if (results.length === 0) {
+                container.innerHTML = '<div class="text-center p-8 text-gray-500 dark:text-gray-400"><i class="fas fa-info-circle text-4xl mb-3"></i><p class="font-semibold">لا يوجد غياب مسجل حسب الفلاتر المختارة.</p></div>';
+                DOMElements.exportAnalysisBtnContainer.classList.add('hidden-view');
+                return;
+            }
+            
+            const tableContainer = document.createElement('div');
+            tableContainer.className = "overflow-x-auto";
+
+            const table = document.createElement('table');
+            table.className = 'w-full text-right';
+            let tableHTML = `
+                <thead class="bg-gray-100 dark:bg-gray-700">
+                    <tr>
+                        <th class="p-4 font-bold text-sm">الاسم</th>
+                        <th class="p-4 font-bold text-sm">الخدمة</th>
+                        <th class="p-4 font-bold text-sm text-center">${isPercentageMode ? 'نسبة الغياب' : 'عدد مرات الغياب'}</th>
+                        <th class="p-4 font-bold text-sm text-center">التفاصيل</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+            `;
+
+            results.forEach(servant => {
+                const valueDisplay = isPercentageMode ? `${servant.value.toFixed(1)}%` : servant.value;
+                tableHTML += `
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <td class="p-4 font-semibold">${servant.name}</td>
+                        <td class="p-4 text-gray-600 dark:text-gray-300">${servant.serviceName}</td>
+                        <td class="p-4 text-center font-bold text-lg ${getPercentageTextColor(100-servant.value)}">${valueDisplay}</td>
+                        <td class="p-4 text-center text-sm text-gray-500">(${servant.absences} غياب من ${servant.totalMeetings} اجتماع)</td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += '</tbody>';
+            table.innerHTML = tableHTML;
+            tableContainer.appendChild(table);
+            container.appendChild(tableContainer);
+            
+            DOMElements.exportAnalysisBtnContainer.classList.remove('hidden-view');
+        }
+
+        async function exportAnalysisAsImage() {
+            const container = document.getElementById('activityAnalysisPage').querySelector('.bg-white');
+            if(!container) return;
+            showMessage('جاري تجهيز الصورة للتصدير...');
+            html2canvas(container, { 
+                backgroundColor: document.body.classList.contains('dark') ? '#1f2937' : '#ffffff',
+                scale: 2,
+                useCORS: true 
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `absence-analysis-${new Date().toISOString().slice(0,10)}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+        
+        // --- [NEW] MESSAGING FUNCTIONS ---
+
+        function loadMessagesPage() {
+            DOMElements.userMessagesContainer.classList.toggle('hidden-view', isGeneralSecretaryMode);
+            DOMElements.adminMessagesContainer.classList.toggle('hidden-view', !isGeneralSecretaryMode);
+
+            if (isGeneralSecretaryMode) {
+                // Admin is already listening via listenForMessages()
+            } else {
+                loadSentMessages();
+            }
+        }
+
+        async function sendMessage(e) {
+            e.preventDefault();
+            const text = DOMElements.newMessageText.value.trim();
+            if (!text) {
+                showMessage("الرجاء كتابة نص الرسالة.", true);
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, 'messages'), {
+                    text: text,
+                    fromService: currentServiceName,
+                    timestamp: serverTimestamp(),
+                    isRead: false
+                });
+                showMessage("تم إرسال رسالتك بنجاح.");
+                DOMElements.sendMessageForm.reset();
+                loadSentMessages(); // Refresh the sent messages list
+            } catch (error) {
+                console.error("Error sending message: ", error);
+                showMessage("فشل إرسال الرسالة.", true);
+            }
+        }
+        
+        async function loadSentMessages() {
+            const q = query(collection(db, 'messages'), where('fromService', '==', currentServiceName), orderBy('timestamp', 'desc'));
+            const querySnapshot = await getDocs(q);
+            const messages = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            
+            const container = DOMElements.sentMessagesList;
+            container.innerHTML = '';
+            if (messages.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center">لم تقم بإرسال أي رسائل بعد.</p>';
+                return;
+            }
+
+            messages.forEach(msg => {
+                const date = msg.timestamp?.toDate().toLocaleString('ar-EG') || 'غير محدد';
+                container.innerHTML += `
+                    <div class="bg-gray-100 dark:bg-gray-700/50 p-3 rounded-lg">
+                        <p class="text-gray-800 dark:text-gray-200">${msg.text}</p>
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                            <span><i class="fas fa-calendar-alt mr-1"></i> ${date}</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function listenForMessages() {
+            if (messagesUnsubscribe) messagesUnsubscribe();
+            const messagesCol = collection(db, 'messages');
+            const q = query(messagesCol, orderBy('timestamp', 'desc'));
+            messagesUnsubscribe = onSnapshot(q, (snapshot) => {
+                const messages = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderReceivedMessages(messages);
+
+                const unreadCount = messages.filter(m => !m.isRead).length;
+                const badge = DOMElements.messagesBadge;
+                if (unreadCount > 0) {
+                    badge.textContent = unreadCount;
+                    badge.classList.remove('hidden-view');
+                } else {
+                    badge.classList.add('hidden-view');
+                }
+            });
+        }
+
+        function renderReceivedMessages(messages) {
+            const container = DOMElements.receivedMessagesList;
+            container.innerHTML = '';
+            if (messages.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center">لا يوجد رسائل واردة.</p>';
+                return;
+            }
+
+            messages.forEach(msg => {
+                const date = msg.timestamp?.toDate().toLocaleString('ar-EG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) || 'غير محدد';
+                const isReadClass = msg.isRead ? 'bg-gray-100 dark:bg-gray-700/50' : 'bg-cyan-100 dark:bg-cyan-900/50 border-r-4 border-cyan-500';
+                
+                container.innerHTML += `
+                    <div data-message-id="${msg.id}" class="message-item p-4 rounded-lg cursor-pointer transition-colors hover:bg-gray-200 dark:hover:bg-gray-700 ${isReadClass}">
+                        <div class="flex justify-between items-center">
+                            <p class="font-bold text-cyan-800 dark:text-cyan-200">من: ${msg.fromService}</p>
+                            <span class="text-xs text-gray-500 dark:text-gray-400">${date}</span>
+                        </div>
+                        <p class="mt-2 text-gray-700 dark:text-gray-300 truncate">${msg.text}</p>
+                    </div>
+                `;
+            });
+
+            container.querySelectorAll('.message-item').forEach(item => {
+                item.addEventListener('click', async () => {
+                    const messageId = item.dataset.messageId;
+                    const message = messages.find(m => m.id === messageId);
+                    if (message) {
+                        DOMElements.messageViewModalTitle.textContent = `رسالة من: ${message.fromService}`;
+                        DOMElements.messageViewModalBody.innerHTML = `<p class="whitespace-pre-wrap">${message.text}</p>`;
+                        openModal(DOMElements.messageViewModal);
+                        if (!message.isRead) {
+                            await updateDoc(doc(db, 'messages', messageId), { isRead: true });
+                        }
+                    }
+                });
+            });
+        }
 
 
         // --- APP INITIALIZATION ---
@@ -2703,7 +3378,9 @@
                 restoreBtn: document.getElementById('restoreBtn'),
                 totalServantsStat: document.getElementById('totalServantsStat'),
                 upcomingBirthdayStat: document.getElementById('upcomingBirthdayStat'),
-                monthlyActivityLog: document.getElementById('monthlyActivityLog'),
+                lastFridayAbsenceStat: document.getElementById('lastFridayAbsenceStat'),
+                lastFridayAbsenceCount: document.getElementById('lastFridayAbsenceCount'),
+                lastFridayStatusContainer: document.getElementById('lastFridayStatusContainer'),
                 quickAddServant: document.getElementById('quickAddServant'),
                 quickGoToAttendance: document.getElementById('quickGoToAttendance'),
                 serviceDashboardContainer: document.getElementById('serviceDashboardContainer'),
@@ -2727,6 +3404,34 @@
                 followUpPanel: document.getElementById('followUpPanel'),
                 birthdaysPanel: document.getElementById('birthdaysPanel'),
                 attendanceFollowUpPanel: document.getElementById('attendanceFollowUpPanel'),
+                activityAnalysisLink: document.getElementById('activityAnalysisLink'),
+                followUpLink: document.getElementById('followUpLink'),
+                analysisServiceFilter: document.getElementById('analysisServiceFilter'),
+                analysisYearFilter: document.getElementById('analysisYearFilter'),
+                analysisMonthCheckboxes: document.getElementById('analysisMonthCheckboxes'),
+                analysisModeToggle: document.getElementById('analysisModeToggle'),
+                analysisModeLabel: document.getElementById('analysisModeLabel'),
+                generateAnalysisBtn: document.getElementById('generateAnalysisBtn'),
+                analysisResultContainer: document.getElementById('analysisResultContainer'),
+                exportAnalysisBtnContainer: document.getElementById('exportAnalysisBtnContainer'),
+                exportAnalysisBtn: document.getElementById('exportAnalysisBtn'),
+                themeCheckbox: document.getElementById('theme-checkbox'),
+                totalServantsCard: document.getElementById('totalServantsCard'),
+                activityAttendeesModal: document.getElementById('activityAttendeesModal'),
+                activityAttendeesModalTitle: document.getElementById('activityAttendeesModalTitle'),
+                activityAttendeesModalBody: document.getElementById('activityAttendeesModalBody'),
+                messagesPage: document.getElementById('messagesPage'),
+                adminMessagesContainer: document.getElementById('adminMessagesContainer'),
+                userMessagesContainer: document.getElementById('userMessagesContainer'),
+                receivedMessagesList: document.getElementById('receivedMessagesList'),
+                sendMessageForm: document.getElementById('sendMessageForm'),
+                newMessageText: document.getElementById('newMessageText'),
+                sentMessagesList: document.getElementById('sentMessagesList'),
+                messagesBadge: document.getElementById('messagesBadge'),
+                messageViewModal: document.getElementById('messageViewModal'),
+                messageViewModalTitle: document.getElementById('messageViewModalTitle'),
+                messageViewModalBody: document.getElementById('messageViewModalBody'),
+                messageViewModalCloseBtn: document.getElementById('messageViewModalCloseBtn'),
             };
 
             initializeFirebase();
