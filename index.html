@@ -231,47 +231,37 @@
                         <div id="serviceDashboardContainer">
                              <h1 class="h1 mb-6">لوحة معلومات الخدمة</h1>
                              <div id="announcementsDisplay" class="mb-6"></div>
-
-                             
-                              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8"><!-- [unchanged wrapper] --></div> 
-                              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
-                                <div id="totalServantsCard" class="col-span-1 md:col-span-2 lg:col-span-4 bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg flex items-center justify-between gap-6 cursor-pointer transition-transform hover:scale-[1.01]">
-                                <div class="flex items-center gap-5"> <i class="fas fa-users text-5xl md:text-6xl text-cyan-500"></i>
-                                 <div> <p class="text-gray-500 dark:text-gray-400 text-sm md:text-base">إجمالي الخدام</p> <p id="totalServantsStat" class="text-4xl md:text-5xl font-extrabold">0</p> </div> </div> 
-
-                                 <div class="hidden md:flex items-center gap-3 text-cyan-700 dark:text-cyan-300"> <i class="fas fa-chart-line"></i> <span class="text-sm md:text-base">نظرة عامة سريعة</span> </div> 
-                                 
-                                 </div> 
-                                  <div class="col-span-1 md:col-span-1 lg:col-span-2 bg-white dark:bg-gray-800 p-8 rounded-xl grow overflow-y-auto" style="max-height: 250px;"> 
-                                    <h3 class="font-bold text-pink-600 dark:text-pink-400 mb-2 text-lg flex-shrink-0">أعياد ميلاد قادمة</h3> 
-                                 <div id="upcomingBirthdayStat" class="overflow-y-auto flex-grow" style="max-height: 250px;"></div>
-                                  </div> <!-- END CHANGED --> <!-- CHANGED: غياب الجمعة (نصف الصف) --> 
-                                  <div class="col-span-1 md:col-span-1 lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col">
-                                    <div class="flex justify-between items-baseline mb-2"> <h3 class="font-bold text-red-600 dark:text-red-400 text-lg">غياب الجمعة الماضية</h3>
-                                     <div id="lastFridayAbsenceCount" class="font-bold text-lg"></div> </div> 
-                                     <div id="lastFridayAbsenceStat" class="text-sm text-gray-500 dark:text-gray-400 flex-grow"  style="max-height: 250px;"></div>
-                                      </div> <!-- END CHANGED -->
-
+                             <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
+                                <div id="totalServantsCard" class="lg:col-span-4 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex items-center gap-4 cursor-pointer transition-transform hover:scale-105">
+                                    <i class="fas fa-users text-4xl text-cyan-500"></i>
+                                    <div>
+                                        <p class="text-gray-500 dark:text-gray-400 text-sm">إجمالي الخدام</p>
+                                        <p id="totalServantsStat" class="text-3xl font-bold">0</p>
+                                    </div>
                                 </div>
-                             
+                                <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col">
+                                    <h3 class="font-bold text-pink-600 dark:text-pink-400 mb-2 text-lg flex-shrink-0">أعياد ميلاد قادمة</h3>
+                                    <div id="upcomingBirthdayStat" class="overflow-y-auto flex-grow" style="max-height: 120px;">
+                                        <!-- Birthday list will be populated here -->
+                                    </div>
+                                </div>
+                                <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col">
+                                    <div class="flex justify-between items-baseline mb-2">
+                                        <h3 class="font-bold text-red-600 dark:text-red-400 text-lg">غياب الجمعة الماضية</h3>
+                                        <div id="lastFridayAbsenceCount" class="font-bold text-lg"></div>
+                                    </div>
                                     <div id="lastFridayAbsenceStat" class="text-sm text-gray-500 dark:text-gray-400 flex-grow">
                                         <!-- Absentee list will be populated here -->
                                     </div>
-                                    
                                 </div>
-                                <div class="lg:col-span-4 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg mb-8">
-                                    
-                                    <h3 class="font-bold text-cyan-600 dark:text-cyan-400 mb-6 text-lg">حالة تسجيل أنشطة الجمعة الماضية</h3>
-                                    
+                                <div class="lg:col-span-4 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                                    <h3 class="font-bold text-cyan-600 dark:text-cyan-400 mb-2 text-lg">حالة تسجيل أنشطة الجمعة الماضية</h3>
                                     <div id="lastFridayStatusContainer" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
                                         <!-- Activity status will be populated here -->
                                     </div>
                                 </div>
                             </div>
                             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-                           
-                               
                                 <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
                                     <h2 class="h2 mb-4">متوسط الحضور (آخر 30 يوم)</h2>
                                     <div class="relative h-80">
@@ -564,34 +554,6 @@
                             </div>
                         </div>
                     </div>
-                    <!-- [NEW] Page: Messages -->
-                    <div id="messagesPage" class="page-content hidden-view">
-                        <!-- Admin View: Inbox -->
-                        <div id="adminMessagesContainer" class="hidden-view">
-                            <h1 class="h1 mb-6">صندوق الوارد</h1>
-                            <div id="receivedMessagesList" class="space-y-4">
-                                <!-- Messages will be populated here -->
-                            </div>
-                        </div>
-
-                        <!-- User View: Send Message -->
-                        <div id="userMessagesContainer" class="hidden-view">
-                            <h1 class="h1 mb-6">إرسال رسالة إلى الأمين العام</h1>
-                            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-                                <form id="sendMessageForm">
-                                    <textarea id="newMessageText" rows="6" class="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500" placeholder="اكتب رسالتك هنا..."></textarea>
-                                    <button id="sendMessageBtn" type="submit" class="mt-4 w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-5 rounded-lg shadow-md transition-all flex items-center justify-center gap-2">
-                                        <i class="fas fa-paper-plane"></i>
-                                        <span>إرسال</span>
-                                    </button>
-                                </form>
-                            </div>
-                            <h2 class="h2 mt-8 mb-4">الرسائل المرسلة</h2>
-                            <div id="sentMessagesList" class="space-y-3">
-                                <!-- Sent messages will be populated here -->
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </main>
         </div>
@@ -683,20 +645,6 @@
             </div>
         </div>
     </div>
-    <div id="messageViewModal" class="fixed inset-0 z-50 items-center justify-center hidden-view modal-backdrop">
-        <div class="bg-white dark:bg-gray-800 w-11/12 md:max-w-lg mx-auto rounded-xl shadow-lg z-50 p-8 max-h-[80vh] flex flex-col">
-            <div class="flex justify-between items-center pb-3 border-b mb-4">
-                <h3 id="messageViewModalTitle" class="h2"></h3>
-                <button class="close-modal-btn cursor-pointer z-50 text-2xl" aria-label="إغلاق النافذة">&times;</button>
-            </div>
-            <div id="messageViewModalBody" class="overflow-y-auto flex-grow">
-                <!-- Message content will be injected here -->
-            </div>
-            <div class="pt-4 border-t mt-4">
-                <button id="messageViewModalCloseBtn" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg">إغلاق</button>
-            </div>
-        </div>
-    </div>
     <div id="messageBox" class="hidden fixed top-5 right-5 text-white py-3 px-6 rounded-lg shadow-xl z-50"></div>
     
     <script type="module">
@@ -764,7 +712,7 @@
 
         // --- GLOBAL STATE ---
         let currentServiceName = '';
-        let db, auth, userId, servantsUnsubscribe = null, announcementsUnsubscribe = null, messagesUnsubscribe = null;
+        let db, auth, userId, servantsUnsubscribe = null, announcementsUnsubscribe = null;
         let servantsCache = [];
         let attendanceYearCache = {}; 
         let currentActivity = '';
@@ -905,7 +853,6 @@
                 populateAnnouncementTargetSelector();
                 await loadAllServicesData();
                 listenForAnnouncements();
-                listenForMessages();
                 switchPage('homePage');
             } else {
                 await loadServants();
@@ -922,7 +869,6 @@
             currentServiceName = '';
             if (servantsUnsubscribe) servantsUnsubscribe();
             if (announcementsUnsubscribe) announcementsUnsubscribe();
-            if (messagesUnsubscribe) messagesUnsubscribe();
             servantsCache = [];
             attendanceYearCache = {};
             isGeneralSecretaryMode = false;
@@ -941,7 +887,7 @@
             const activeLink = DOMElements.sidebarLinks.querySelector(`.sidebar-link[data-page="${pageId}"]`);
             if (activeLink) {
                 activeLink.classList.add('active');
-                DOMElements.mobilePageTitle.textContent = activeLink.innerText.replace(/\d+/g, '').trim();
+                DOMElements.mobilePageTitle.textContent = activeLink.innerText;
             }
 
             if (window.innerWidth < 768) {
@@ -955,7 +901,6 @@
             if (pageId === 'attendancePage' && !isGeneralSecretaryMode) loadAttendancePage();
             if (pageId === 'reportsPage') loadReportsPage();
             if (pageId === 'activityAnalysisPage') initializeActivityAnalysisPage();
-            if (pageId === 'messagesPage') loadMessagesPage();
         }
 
         // --- DATA FETCHING ---
@@ -2074,24 +2019,27 @@
                     } else {
                         const attendees = new Set(serviceActivity.attendees || []);
                         const absentees = servantsCache.filter(servant => !attendees.has(servant.id));
-lastFridayAbsenceCountContainer.innerHTML = `
-    <span class="font-bold text-xl ${absentees.length > 0 ? 'text-red-500' : 'text-green-500'}">${absentees.length}</span>
-    <span class="text-gray-500"> / ${servantsCache.length}</span>
-`;
+                        
+                        lastFridayAbsenceCountContainer.innerHTML = `
+                            <span class="font-bold text-xl ${absentees.length > 0 ? 'text-red-500' : 'text-green-500'}">${absentees.length}</span>
+                            <span class="text-gray-500"> / ${servantsCache.length}</span>
+                        `;
 
-if (absentees.length > 0) {
-    let listHTML = `<div class="overflow-y-auto" style="max-height: 140px;"><ul class="pr-2">`; // تم إزالة space-y-1
-    absentees.forEach(servant => {
-        listHTML += `<li class="font-semibold text-red-700 dark:text-red-400 flex items-center p-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"><i class="fas fa-times-circle text-red-400 ml-3 flex-shrink-0"></i><span class="truncate">${servant.name}</span></li>`;
-    });
-    listHTML += `</ul></div>`;
-    lastFridayAbsenceContainer.innerHTML = listHTML;
-} else {
-    lastFridayAbsenceContainer.innerHTML = `<p class="text-green-600 dark:text-green-400 font-semibold flex items-center mt-2"><i class="fas fa-check-circle ml-2"></i>لا يوجد غياب! كل الخدام حضروا الخدمة.</p>`;
-}   }
+                        if (absentees.length > 0) {
+                            let listHTML = `<div class="overflow-y-auto" style="max-height: 140px;"><ul class="pr-2">`;
+                            absentees.forEach(servant => {
+                                listHTML += `<li class="font-semibold text-red-700 dark:text-red-400 flex items-center p-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"><i class="fas fa-times-circle text-red-400 ml-3 flex-shrink-0"></i><span class="truncate">${servant.name}</span></li>`;
+                            });
+                            listHTML += `</ul></div>`;
+                            lastFridayAbsenceContainer.innerHTML = listHTML;
+                        } else {
+                            lastFridayAbsenceContainer.innerHTML = `<p class="text-green-600 dark:text-green-400 font-semibold flex items-center mt-2"><i class="fas fa-check-circle ml-2"></i>لا يوجد غياب! كل الخدام حضروا الخدمة.</p>`;
+                        }
+                    }
                 } else {
                     lastFridayAbsenceContainer.innerHTML = '<p class="text-gray-400">لم يتم تسجيل حضور الخدمة للجمعة الماضية بعد.</p>';
                 }
+
                 const lastFridayStatusContainer = DOMElements.lastFridayStatusContainer;
                 lastFridayStatusContainer.innerHTML = '';
                 activities.forEach(act => {
@@ -2470,11 +2418,6 @@ if (absentees.length > 0) {
             DOMElements.exportPngBtn.addEventListener('click', exportAsImage);
             DOMElements.exportPdfBtn.addEventListener('click', exportAsPdf);
             
-            // Messages Page Listeners
-            DOMElements.sendMessageForm.addEventListener('submit', sendMessage);
-            DOMElements.messageViewModalCloseBtn.addEventListener('click', () => closeModal(DOMElements.messageViewModal));
-
-
             // Activity Analysis Page Listeners
             DOMElements.generateAnalysisBtn.addEventListener('click', generateAbsenceAnalysis);
             DOMElements.exportAnalysisBtn.addEventListener('click', exportAnalysisAsImage);
@@ -3199,126 +3142,6 @@ if (absentees.length > 0) {
                 link.click();
             });
         }
-        
-        // --- [NEW] MESSAGING FUNCTIONS ---
-
-        function loadMessagesPage() {
-            DOMElements.userMessagesContainer.classList.toggle('hidden-view', isGeneralSecretaryMode);
-            DOMElements.adminMessagesContainer.classList.toggle('hidden-view', !isGeneralSecretaryMode);
-
-            if (isGeneralSecretaryMode) {
-                // Admin is already listening via listenForMessages()
-            } else {
-                loadSentMessages();
-            }
-        }
-
-        async function sendMessage(e) {
-            e.preventDefault();
-            const text = DOMElements.newMessageText.value.trim();
-            if (!text) {
-                showMessage("الرجاء كتابة نص الرسالة.", true);
-                return;
-            }
-
-            try {
-                await addDoc(collection(db, 'messages'), {
-                    text: text,
-                    fromService: currentServiceName,
-                    timestamp: serverTimestamp(),
-                    isRead: false
-                });
-                showMessage("تم إرسال رسالتك بنجاح.");
-                DOMElements.sendMessageForm.reset();
-                loadSentMessages(); // Refresh the sent messages list
-            } catch (error) {
-                console.error("Error sending message: ", error);
-                showMessage("فشل إرسال الرسالة.", true);
-            }
-        }
-        
-        async function loadSentMessages() {
-            const q = query(collection(db, 'messages'), where('fromService', '==', currentServiceName), orderBy('timestamp', 'desc'));
-            const querySnapshot = await getDocs(q);
-            const messages = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            
-            const container = DOMElements.sentMessagesList;
-            container.innerHTML = '';
-            if (messages.length === 0) {
-                container.innerHTML = '<p class="text-gray-500 text-center">لم تقم بإرسال أي رسائل بعد.</p>';
-                return;
-            }
-
-            messages.forEach(msg => {
-                const date = msg.timestamp?.toDate().toLocaleString('ar-EG') || 'غير محدد';
-                container.innerHTML += `
-                    <div class="bg-gray-100 dark:bg-gray-700/50 p-3 rounded-lg">
-                        <p class="text-gray-800 dark:text-gray-200">${msg.text}</p>
-                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                            <span><i class="fas fa-calendar-alt mr-1"></i> ${date}</span>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        function listenForMessages() {
-            if (messagesUnsubscribe) messagesUnsubscribe();
-            const messagesCol = collection(db, 'messages');
-            const q = query(messagesCol, orderBy('timestamp', 'desc'));
-            messagesUnsubscribe = onSnapshot(q, (snapshot) => {
-                const messages = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderReceivedMessages(messages);
-
-                const unreadCount = messages.filter(m => !m.isRead).length;
-                const badge = DOMElements.messagesBadge;
-                if (unreadCount > 0) {
-                    badge.textContent = unreadCount;
-                    badge.classList.remove('hidden-view');
-                } else {
-                    badge.classList.add('hidden-view');
-                }
-            });
-        }
-
-        function renderReceivedMessages(messages) {
-            const container = DOMElements.receivedMessagesList;
-            container.innerHTML = '';
-            if (messages.length === 0) {
-                container.innerHTML = '<p class="text-gray-500 text-center">لا يوجد رسائل واردة.</p>';
-                return;
-            }
-
-            messages.forEach(msg => {
-                const date = msg.timestamp?.toDate().toLocaleString('ar-EG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) || 'غير محدد';
-                const isReadClass = msg.isRead ? 'bg-gray-100 dark:bg-gray-700/50' : 'bg-cyan-100 dark:bg-cyan-900/50 border-r-4 border-cyan-500';
-                
-                container.innerHTML += `
-                    <div data-message-id="${msg.id}" class="message-item p-4 rounded-lg cursor-pointer transition-colors hover:bg-gray-200 dark:hover:bg-gray-700 ${isReadClass}">
-                        <div class="flex justify-between items-center">
-                            <p class="font-bold text-cyan-800 dark:text-cyan-200">من: ${msg.fromService}</p>
-                            <span class="text-xs text-gray-500 dark:text-gray-400">${date}</span>
-                        </div>
-                        <p class="mt-2 text-gray-700 dark:text-gray-300 truncate">${msg.text}</p>
-                    </div>
-                `;
-            });
-
-            container.querySelectorAll('.message-item').forEach(item => {
-                item.addEventListener('click', async () => {
-                    const messageId = item.dataset.messageId;
-                    const message = messages.find(m => m.id === messageId);
-                    if (message) {
-                        DOMElements.messageViewModalTitle.textContent = `رسالة من: ${message.fromService}`;
-                        DOMElements.messageViewModalBody.innerHTML = `<p class="whitespace-pre-wrap">${message.text}</p>`;
-                        openModal(DOMElements.messageViewModal);
-                        if (!message.isRead) {
-                            await updateDoc(doc(db, 'messages', messageId), { isRead: true });
-                        }
-                    }
-                });
-            });
-        }
 
 
         // --- APP INITIALIZATION ---
@@ -3420,18 +3243,6 @@ if (absentees.length > 0) {
                 activityAttendeesModal: document.getElementById('activityAttendeesModal'),
                 activityAttendeesModalTitle: document.getElementById('activityAttendeesModalTitle'),
                 activityAttendeesModalBody: document.getElementById('activityAttendeesModalBody'),
-                messagesPage: document.getElementById('messagesPage'),
-                adminMessagesContainer: document.getElementById('adminMessagesContainer'),
-                userMessagesContainer: document.getElementById('userMessagesContainer'),
-                receivedMessagesList: document.getElementById('receivedMessagesList'),
-                sendMessageForm: document.getElementById('sendMessageForm'),
-                newMessageText: document.getElementById('newMessageText'),
-                sentMessagesList: document.getElementById('sentMessagesList'),
-                messagesBadge: document.getElementById('messagesBadge'),
-                messageViewModal: document.getElementById('messageViewModal'),
-                messageViewModalTitle: document.getElementById('messageViewModalTitle'),
-                messageViewModalBody: document.getElementById('messageViewModalBody'),
-                messageViewModalCloseBtn: document.getElementById('messageViewModalCloseBtn'),
             };
 
             initializeFirebase();
