@@ -142,19 +142,55 @@
             border-radius: 50%;
         }
         .notification-badge {
-            position: absolute;
-            top: 5px;
-            left: 5px;
-            background-color: var(--color-danger);
-            color: white;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            font-size: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
+            background-color: var(--color-danger);
+            color: white;
+            border-radius: 50%;
+        }
+        /* Style for the selected Friday button */
+        .friday-btn.active {
+            background-color: var(--color-primary-darker);
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.5);
+            border: 2px solid white;
+        }
+        .unread-note {
+            background-color: var(--color-primary-light) !important;
+            border-right: 4px solid var(--color-primary);
+        }
+        
+        /* Bulletin Board Styles */
+        .bulletin-board-bg {
+             background-image: url('https://www.transparenttextures.com/patterns/wood-pattern.png'), linear-gradient(to bottom right, #d2b48c, #c19a6b);
+             background-blend-mode: overlay;
+             box-shadow: inset 0 0 20px rgba(0,0,0,0.4);
+             min-height: 80vh;
+        }
+        .announcement-note {
+            background-color: #ffffe0;
+            color: #333;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.2);
+            transition: transform 0.2s ease-in-out;
+            font-family: 'Cairo', sans-serif; 
+        }
+        .announcement-note:hover {
+            transform: scale(1.05) rotate(0deg) !important;
+            z-index: 10;
+        }
+        .announcement-note::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 20px;
+            background: #d9534f;
+            border-radius: 50% 50% 0 0;
+            box-shadow: 0 -2px 2px rgba(0,0,0,0.2);
         }
     </style>
 </head>
@@ -179,7 +215,7 @@
             </main>
         </div>
     </div>
-
+    
     <!-- Main Dashboard View (Initially Hidden) -->
     <div id="mainDashboard" class="hidden-view">
         <div class="flex h-screen bg-gray-100 dark:bg-gray-800">
@@ -191,12 +227,29 @@
                 </div>
                 <div id="sidebarLinks" class="flex-grow pt-4">
                     <a href="#" data-page="homePage" class="sidebar-link active flex items-center py-3 px-4 text-gray-700 dark:text-gray-300"><i class="fas fa-tachometer-alt ml-3 w-6 text-center"></i> لوحة المعلومات</a>
+                    <a href="#" data-page="serviceAnnouncementsPage" id="serviceAnnouncementsLink" class="sidebar-link relative flex items-center py-3 px-4 text-gray-700 dark:text-gray-300 hidden-view">
+                        <i class="fas fa-bullhorn ml-3 w-6 text-center"></i>
+                        <span>لوحة الإعلانات</span>
+                        <span id="serviceAnnouncementsBadge" class="notification-badge hidden-view absolute top-2 right-2 w-5 h-5 text-xs"></span>
+                    </a>
+                    <a href="#" data-page="announcementsBoardPage" id="announcementsBoardLink" class="sidebar-link relative flex items-center py-3 px-4 text-gray-700 dark:text-gray-300 hidden-view">
+                        <i class="fas fa-bullhorn ml-3 w-6 text-center"></i>
+                        <span>لوحة الاعلانات</span>
+                    </a>
+                    <a href="#" data-page="correspondenceCenterPage" id="correspondenceCenterLink" class="sidebar-link flex items-center py-3 px-4 text-gray-700 dark:text-gray-300 hidden-view">
+                        <i class="fas fa-paper-plane ml-3 w-6 text-center"></i>
+                        <span>مركز المراسلات</span>
+                    </a>
+                    <a href="#" data-page="correspondencePage" id="correspondenceLink" class="sidebar-link relative flex items-center py-3 px-4 text-gray-700 dark:text-gray-300 hidden-view">
+                        <i class="fas fa-envelope-open-text ml-3 w-6 text-center"></i>
+                        <span>صندوق الرسائل</span>
+                        <span id="correspondenceBadge" class="notification-badge hidden-view absolute top-2 right-2 w-5 h-5 text-xs"></span>
+                    </a>
                     <a href="#" data-page="followUpPage" id="followUpLink" class="sidebar-link flex items-center py-3 px-4 text-gray-700 dark:text-gray-300 hidden-view"><i class="fas fa-clipboard-check ml-3 w-6 text-center"></i> صفحة المتابعة</a>
                     <a href="#" data-page="servantsPage" class="sidebar-link flex items-center py-3 px-4 text-gray-700 dark:text-gray-300"><i class="fas fa-users ml-3 w-6 text-center"></i> إدارة الخدام</a>
                     <a href="#" data-page="attendancePage" class="sidebar-link flex items-center py-3 px-4 text-gray-700 dark:text-gray-300"><i class="fas fa-check-square ml-3 w-6 text-center"></i> تسجيل الحضور</a>
+                    <a href="#" data-page="calendarPage" class="sidebar-link flex items-center py-3 px-4 text-gray-700 dark:text-gray-300"><i class="fas fa-calendar-alt ml-3 w-6 text-center"></i> التقويم</a>
                     <a href="#" data-page="reportsPage" class="sidebar-link flex items-center py-3 px-4 text-gray-700 dark:text-gray-300"><i class="fas fa-chart-pie ml-3 w-6 text-center"></i> التقارير والإحصائيات</a>
-                    <a href="#" data-page="activityAnalysisPage" id="activityAnalysisLink" class="sidebar-link flex items-center py-3 px-4 text-gray-700 dark:text-gray-300 hidden-view"><i class="fas fa-chart-line ml-3 w-6 text-center"></i> تحليل الأنشطة</a>
-                    <a href="#" data-page="messagesPage" class="sidebar-link flex items-center py-3 px-4 text-gray-700 dark:text-gray-300 relative"><i class="fas fa-envelope ml-3 w-6 text-center"></i> الرسائل <span id="messagesBadge" class="notification-badge hidden-view"></span></a>
                 </div>
                 <div class="p-4 border-t dark:border-gray-700 space-y-2">
                      <div class="theme-switch-wrapper py-2">
@@ -230,7 +283,6 @@
                         <!-- Service-specific Dashboard -->
                         <div id="serviceDashboardContainer">
                              <h1 class="h1 mb-6">لوحة معلومات الخدمة</h1>
-                             <div id="announcementsDisplay" class="mb-6"></div>
                              <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
                                 <div id="totalServantsCard" class="lg:col-span-4 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex items-center gap-4 cursor-pointer transition-transform hover:scale-105">
                                     <i class="fas fa-users text-4xl text-cyan-500"></i>
@@ -322,22 +374,98 @@
                                         <h2 class="h2 mb-4">متوسط الحضور العام (آخر 30 يوم)</h2>
                                         <div class="relative h-80"><canvas id="adminAttendanceChart"></canvas></div>
                                     </div>
-                                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
-                                        <h2 class="h2 mb-4">لوحة الإعلانات المركزية</h2>
-                                        <div id="adminAnnouncementsList" class="space-y-3 max-h-40 overflow-y-auto mb-4 pr-2"></div>
-                                        <textarea id="newAnnouncementInput" class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700" placeholder="اكتب إعلانك الجديد هنا..."></textarea>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mt-4">توجيه الإعلان إلى:</label>
-                                        <div id="announcementTarget" class="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 h-32 overflow-y-auto space-y-2">
-                                            <!-- Checkboxes will be populated by JS -->
-                                        </div>
-                                        <button id="addAnnouncementBtn" class="mt-3 w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-lg">إضافة إعلان</button>
-                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- [NEW] Page: Follow-up Page -->
+                     <!-- [NEW] Service Announcements Bulletin Board Page -->
+                    <div id="serviceAnnouncementsPage" class="page-content hidden-view">
+                         <div class="text-center mb-10">
+                            <h1 id="bulletinBoardTitle" class="h1 text-amber-800 dark:text-amber-400">لوحة إعلانات الخدمة</h1>
+                        </div>
+                        <div id="bulletinBoard" class="bulletin-board-bg p-6 rounded-xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                            <!-- Announcement notes will be populated here -->
+                        </div>
+                        <div id="loadMoreAnnouncementsContainer" class="text-center mt-6 hidden-view">
+                            <button id="loadMoreAnnouncementsBtn" class="bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 px-6 rounded-lg shadow-lg">
+                                <i class="fas fa-history mr-2"></i> عرض الإعلانات القديمة
+                            </button>
+                        </div>
+                    </div>
+
+
+                    <!-- [NEW] Page: Announcements Board Page -->
+                    <div id="announcementsBoardPage" class="page-content hidden-view">
+                        <h1 class="h1 mb-6 text-cyan-600 dark:text-cyan-400">لوحة الاعلانات</h1>
+                        <div class="max-w-4xl mx-auto bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg space-y-8">
+                            
+                            <!-- Step 1: Target -->
+                            <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                                <h2 class="h3 border-b pb-2 mb-4 text-gray-700 dark:text-gray-300 flex items-center gap-3">
+                                    <span class="bg-cyan-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">1</span>
+                                    <span>توجيه الإعلان</span>
+                                </h2>
+                                <div id="announcementTarget" class="w-full p-3 border rounded-lg bg-white dark:bg-gray-700 h-32 overflow-y-auto space-y-2">
+                                    <!-- Checkboxes will be populated by JS -->
+                                </div>
+                            </div>
+
+                            <!-- Step 2: Compose -->
+                            <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                                <h2 class="h3 border-b pb-2 mb-4 text-gray-700 dark:text-gray-300 flex items-center gap-3">
+                                     <span class="bg-cyan-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">2</span>
+                                    <span>كتابة الإعلان</span>
+                                </h2>
+                                <textarea id="newAnnouncementInput" class="w-full p-2 border rounded-lg bg-white dark:bg-gray-700" placeholder="اكتب إعلانك الجديد هنا..." rows="4"></textarea>
+                                <button id="addAnnouncementBtn" class="mt-4 w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2">
+                                    <i class="fas fa-paper-plane"></i>
+                                    <span>إرسال الإعلان</span>
+                                </button>
+                            </div>
+
+                             <!-- Step 3: History -->
+                            <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                                <h2 class="h3 border-b pb-2 mb-4 text-gray-700 dark:text-gray-300 flex items-center gap-3">
+                                     <span class="bg-cyan-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">3</span>
+                                    <span>سجل الإعلانات المرسلة</span>
+                                </h2>
+                                <div id="adminAnnouncementsList" class="space-y-3 max-h-96 overflow-y-auto pr-2"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- [NEW] Page: Correspondence Page -->
+                    <div id="correspondencePage" class="page-content hidden-view">
+                        <h1 class="h1 mb-6">صندوق الرسائل</h1>
+                         <div class="max-w-2xl mx-auto bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                            <div id="incomingNotesContainer" class="space-y-3 max-h-[75vh] overflow-y-auto pr-2">
+                                <p class="text-gray-400 text-center text-sm p-4">جاري تحميل الرسائل...</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- [NEW] Page: Correspondence Center (for sending messages) -->
+                    <div id="correspondenceCenterPage" class="page-content hidden-view">
+                        <h1 class="h1 mb-6">مركز المراسلات</h1>
+                        <div class="max-w-2xl mx-auto bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                             <h2 class="h2 mb-2">إرسال رسالة جديدة للأمين العام</h2>
+                             <p class="text-gray-500 mb-4 text-sm">سيتم إرسال هذه الرسالة مباشرة إلى صندوق الوارد الخاص بالأمين العام.</p>
+                             <textarea id="noteToAdminInput" class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-500" placeholder="اكتب رسالتك هنا..."></textarea>
+                             <button id="sendNoteToAdminBtn" class="mt-3 w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2">
+                                <i class="fas fa-paper-plane"></i>
+                                <span>إرسال</span>
+                             </button>
+                             <div class="mt-6 border-t dark:border-gray-700 pt-4">
+                                 <h3 class="font-bold text-lg mb-3">سجل الرسائل المرسلة</h3>
+                                 <div id="sentNotesHistory" class="space-y-2 max-h-60 overflow-y-auto pr-2">
+                                     <!-- Sent notes will be populated here -->
+                                 </div>
+                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Page: Follow-up Page -->
                     <div id="followUpPage" class="page-content hidden-view">
                         <h1 class="h1 mb-6">صفحة المتابعة</h1>
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -425,6 +553,31 @@
                          </div>
                     </div>
 
+                    <!-- Page: Calendar -->
+                    <!-- Page: Calendar -->
+                    <div id="calendarPage" class="page-content hidden-view">
+                        <h1 class="h1 mb-6">التقويم</h1>
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+                            <div id="calendarServiceFilterContainer" class="hidden-view mb-4 max-w-lg">
+    <label for="calendarServiceSelector" class="block mb-2 font-bold">اختر الخدمة:</label>
+    <select id="calendarServiceSelector" class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></select>
+</div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 max-w-lg">
+                                 <div>
+                                    <label for="calendarYearSelector" class="block mb-2 font-bold">اختر السنة:</label>
+                                    <select id="calendarYearSelector" class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></select>
+                                 </div>
+                                 <div>
+                                    <label for="calendarMonthSelector" class="block mb-2 font-bold">اختر الشهر:</label>
+                                    <select id="calendarMonthSelector" class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></select>
+                                 </div>
+                            </div>
+                            <div id="calendarContent" class="overflow-x-auto">
+                                <!-- Calendar content will be generated by JS -->
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Page: Reports -->
                     <div id="reportsPage" class="page-content hidden-view">
                         <h1 class="h1 mb-6">التقارير والإحصائيات</h1>
@@ -494,66 +647,6 @@
                         </div>
                     </div>
 
-                    <!-- [RE-STYLED] Page: Activity Analysis with Filters -->
-                    <div id="activityAnalysisPage" class="page-content hidden-view">
-                        <h1 class="h1 mb-2">تحليل الغياب</h1>
-                        <p class="text-gray-500 dark:text-gray-400 mb-6">استخدم الفلاتر أدناه لعرض تقارير الغياب المخصصة.</p>
-                        
-                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-                            <!-- Filters Section -->
-                            <div class="space-y-6">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label for="analysisServiceFilter" class="block mb-2 font-bold text-sm text-gray-700 dark:text-gray-300">الخدمة:</label>
-                                        <select id="analysisServiceFilter" class="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"></select>
-                                    </div>
-                                    <div>
-                                        <label for="analysisYearFilter" class="block mb-2 font-bold text-sm text-gray-700 dark:text-gray-300">السنة:</label>
-                                        <select id="analysisYearFilter" class="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"></select>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div class="flex justify-between items-center mb-2">
-                                        <label class="block font-bold text-sm text-gray-700 dark:text-gray-300">الأشهر (اختر شهر أو أكثر):</label>
-                                        <div class="flex items-center">
-                                            <input id="selectAllMonths" type="checkbox" class="w-4 h-4 text-cyan-600 bg-gray-100 border-gray-300 rounded focus:ring-cyan-500 ml-2 cursor-pointer">
-                                            <label for="selectAllMonths" class="text-sm font-medium cursor-pointer">اختيار الكل</label>
-                                        </div>
-                                    </div>
-                                    <div id="analysisMonthCheckboxes" class="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-3">
-                                        <!-- Month checkboxes will be populated here -->
-                                    </div>
-                                </div>
-                                <div class="flex flex-col md:flex-row items-center justify-between gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                                     <div class="flex items-center gap-3">
-                                        <label class="font-bold text-sm whitespace-nowrap">عرض النتيجة كـ:</label>
-                                        <div class="relative inline-block w-28 h-10 flex items-center justify-center">
-                                            <input type="checkbox" id="analysisModeToggle" class="absolute w-full h-full opacity-0 z-10 cursor-pointer"/>
-                                            <div class="w-full h-full bg-gray-300 dark:bg-gray-600 rounded-full shadow-inner"></div>
-                                            <div id="analysisModeLabel" class="absolute text-white font-bold transition-all duration-300 ease-in-out"></div>
-                                        </div>
-                                    </div>
-                                    <button id="generateAnalysisBtn" class="w-full md:w-auto bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2">
-                                        <i class="fas fa-cogs"></i>
-                                        <span>إنشاء التقرير</span>
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <!-- Results Section -->
-                            <div id="analysisResultContainer" class="mt-8 border-t border-gray-200 dark:border-gray-700 pt-6">
-                                <!-- Analysis results will be injected here -->
-                            </div>
-                            
-                            <!-- Export Button -->
-                             <div id="exportAnalysisBtnContainer" class="flex justify-end mt-6 hidden-view">
-                                <button id="exportAnalysisBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg shadow-md transition-all flex items-center justify-center gap-2">
-                                    <i class="fas fa-file-image"></i>
-                                    <span>تصدير كصورة</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </main>
         </div>
@@ -644,8 +737,61 @@
                 <!-- Attendee list will be injected here -->
             </div>
         </div>
+        
     </div>
     <div id="messageBox" class="hidden fixed top-5 right-5 text-white py-3 px-6 rounded-lg shadow-xl z-50"></div>
+    <!-- [NEW] Calendar Event Modal -->
+<!-- === أضف الكود الجديد هنا === -->
+<!-- [NEW] Aggregated Calendar Events Summary Modal -->
+<div id="aggregatedEventsModal" class="fixed inset-0 z-50 items-center justify-center hidden-view modal-backdrop">
+    <div class="bg-white dark:bg-gray-800 w-11/12 md:max-w-2xl mx-auto rounded-xl shadow-lg z-50 p-8 max-h-[90vh] flex flex-col">
+         <div class="flex justify-between items-center pb-3 border-b mb-4 dark:border-gray-600">
+            <h3 id="aggregatedEventsModalTitle" class="h2 text-cyan-600"></h3>
+            <button class="close-modal-btn cursor-pointer z-50 text-2xl" aria-label="إغلاق النافذة">&times;</button>
+        </div>
+        <div id="aggregatedEventsModalBody" class="overflow-y-auto space-y-3">
+            <!-- Event summary will be injected here -->
+        </div>
+    </div>
+</div>
+<!-- === نهاية الكود المضاف === -->
+
+    <div id="calendarEventModal" class="fixed inset-0 z-50 items-center justify-center hidden-view modal-backdrop">
+        <div class="bg-white dark:bg-gray-800 w-11/12 md:max-w-md mx-auto rounded-xl shadow-lg z-50 p-8">
+            <div class="flex justify-between items-center pb-3 border-b dark:border-gray-600">
+                <h3 class="h2">حدث ليوم: <span id="eventModalDate" class="text-cyan-600"></span></h3>
+                <button class="close-modal-btn cursor-pointer z-50 text-2xl" aria-label="إغلاق النافذة">&times;</button>
+            </div>
+            <form id="calendarEventForm" class="mt-4 space-y-4">
+                <input type="hidden" id="eventDate" />
+                <div>
+                    <label for="eventTypeSelector" class="block mb-2 font-bold text-sm">نوع النشاط:</label>
+                    <select id="eventTypeSelector" class="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
+                        <option value="">-- اختر --</option>
+                        <option value="رحلة دينية">رحلة دينية</option>
+                        <option value="رحلة ترفيهية">رحلة ترفيهية</option>
+                        <option value="يوم رياضي">يوم رياضي</option>
+                        <option value="يوم روحي">يوم روحي</option>
+                        <option value="اجتماع خدام">اجتماع خدام</option>
+                        <option value="حفلة">حفلة</option>
+                        <option value="أخرى">أخرى</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="eventDetailsInput" class="block mb-2 font-bold text-sm">تفاصيل إضافية:</label>
+                    <textarea id="eventDetailsInput" placeholder="اكتب تفاصيل أو ملاحظات هنا..." rows="3" class="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></textarea>
+                </div>
+                <div class="flex justify-end gap-4 pt-4 border-t dark:border-gray-600">
+                    <button type="button" id="deleteEventBtn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg hidden-view">
+                        <i class="fas fa-trash mr-2"></i>حذف
+                    </button>
+                    <button type="submit" id="saveEventBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">
+                        <i class="fas fa-save mr-2"></i>حفظ
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -698,12 +844,23 @@
             { key: 'preparation', name: 'التحضير', icon: 'fa-book-open', color: 'rgba(234, 179, 8, 0.7)', borderColor: 'rgba(234, 179, 8, 1)' },
             { key: 'mass', name: 'القداس', icon: 'fa-cross', color: 'rgba(239, 68, 68, 0.7)', borderColor: 'rgba(239, 68, 68, 1)' },
             { key: 'service', name: 'الخدمة', icon: 'fa-church', color: 'rgba(59, 130, 246, 0.7)', borderColor: 'rgba(59, 130, 246, 1)' },
-            { key: 'explanation', name: 'الشرح', icon: 'fa-chalkboard-teacher', color: 'rgba(34, 197, 94, 0.7)', borderColor: 'rgba(34, 197, 94, 1)' }
+            { key: 'explanation', name: 'الشرح', icon: 'fa-chalkboard-teacher', color: 'rgba(34, 197, 94, 0.7)', borderColor: 'rgba(34, 197, 94, 1)' },
+            { key: 'apology', name: 'معتذر', icon: 'fa-hand-paper', color: 'rgba(107, 114, 128, 0.7)', borderColor: 'rgba(107, 114, 128, 1)' }
+        
         ];
         
         const CORRECT_CODE = '123456';
         const ADMIN_CODE = '999999';
         const activityMap = new Map(activities.map(a => [a.key, a]));
+        const eventTypeColors = {
+    "رحلة دينية": "bg-blue-500",
+    "رحلة ترفيهية": "bg-green-500",
+    "يوم رياضي": "bg-orange-500",
+    "يوم روحي": "bg-purple-500",
+    "اجتماع خدام": "bg-yellow-500",
+    "حفلة": "bg-pink-500",
+    "أخرى": "bg-gray-500",
+};
 
 
         // ==================================================================
@@ -712,8 +869,9 @@
 
         // --- GLOBAL STATE ---
         let currentServiceName = '';
-        let db, auth, userId, servantsUnsubscribe = null, announcementsUnsubscribe = null;
+        let db, auth, userId, servantsUnsubscribe = null, announcementsUnsubscribe = null, notesUnsubscribe = null;
         let servantsCache = [];
+        let allAnnouncementsCache = [];
         let attendanceYearCache = {}; 
         let currentActivity = '';
         let selectedFriday = '';
@@ -722,6 +880,14 @@
         let allServantsCache = [];
         let allAttendanceCache = [];
         let isLocalMode = false;
+        let incomingNotesUnsubscribe = null;
+        let displayedAnnouncementsCount = 0;
+        const ANNOUNCEMENTS_PER_PAGE = 3;
+        let unreadNotes = [];
+        let unreadAnnouncementsCache = [];
+        let serviceAnnouncementsUnsubscribe = null;
+        let calendarEventsUnsubscribe = null;
+let calendarEventsCache = {};
         // Chart instances
         let reportChart1 = null, reportChart2 = null, homeChart = null;
         let adminChart = null, comparisonChart = null, profileChart = null, activityComparisonChart = null;
@@ -829,9 +995,14 @@
             DOMElements.servicesGrid.innerHTML = '';
             services.forEach(service => {
                 const card = document.createElement('div');
-                card.className = `service-card bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg hover:shadow-2xl hover:-translate-y-1 transform transition-all duration-300 cursor-pointer flex flex-col items-center text-center border-2 border-transparent hover:ring-4 hover:ring-offset-2 hover:ring-${service.color}-400 dark:hover:ring-offset-gray-900`;
+                card.className = `service-card relative bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg hover:shadow-2xl hover:-translate-y-1 transform transition-all duration-300 cursor-pointer flex flex-col items-center text-center border-2 border-transparent hover:ring-4 hover:ring-offset-2 hover:ring-${service.color}-400 dark:hover:ring-offset-gray-900`;
                 card.dataset.serviceName = service.name;
-                card.innerHTML = `<div class="text-5xl mb-4 text-${service.color}-500">${service.icon}</div><h3 class="h3">${service.name}</h3>`;
+                const badgeId = `service-badge-${service.name.replace(/\s+/g, '-')}`;
+                card.innerHTML = `
+                    <span id="${badgeId}" class="notification-badge hidden-view absolute top-2 right-2 w-6 h-6 text-sm"></span>
+                    <div class="text-5xl mb-4 text-${service.color}-500">${service.icon}</div>
+                    <h3 class="h3">${service.name}</h3>
+                `;
                 DOMElements.servicesGrid.appendChild(card);
             });
         }
@@ -844,8 +1015,11 @@
             
             DOMElements.sidebarLinks.querySelector('[data-page="servantsPage"]').classList.toggle('hidden-view', isGeneralSecretaryMode);
             DOMElements.sidebarLinks.querySelector('[data-page="attendancePage"]').classList.toggle('hidden-view', isGeneralSecretaryMode);
-            DOMElements.activityAnalysisLink.classList.toggle('hidden-view', !isGeneralSecretaryMode);
+            DOMElements.announcementsBoardLink.classList.toggle('hidden-view', !isGeneralSecretaryMode);
+            DOMElements.correspondenceCenterLink.classList.toggle('hidden-view', isGeneralSecretaryMode);
+            DOMElements.correspondenceLink.classList.toggle('hidden-view', !isGeneralSecretaryMode);
             DOMElements.followUpLink.classList.toggle('hidden-view', !isGeneralSecretaryMode);
+            DOMElements.serviceAnnouncementsLink.classList.toggle('hidden-view', isGeneralSecretaryMode);
             
             showLoading(true);
             if (isGeneralSecretaryMode) {
@@ -853,10 +1027,13 @@
                 populateAnnouncementTargetSelector();
                 await loadAllServicesData();
                 listenForAnnouncements();
+                listenForIncomingNotes();
                 switchPage('homePage');
             } else {
                 await loadServants();
                 listenForAnnouncements();
+                listenForSentNotes();
+                listenForServiceAnnouncements();
                 switchPage('homePage');
             }
             showLoading(false);
@@ -869,6 +1046,9 @@
             currentServiceName = '';
             if (servantsUnsubscribe) servantsUnsubscribe();
             if (announcementsUnsubscribe) announcementsUnsubscribe();
+            if (notesUnsubscribe) notesUnsubscribe();
+            if (incomingNotesUnsubscribe) incomingNotesUnsubscribe();
+            if(serviceAnnouncementsUnsubscribe) serviceAnnouncementsUnsubscribe();
             servantsCache = [];
             attendanceYearCache = {};
             isGeneralSecretaryMode = false;
@@ -876,8 +1056,13 @@
             allAttendanceCache = [];
             DOMElements.sidebarLinks.querySelector('[data-page="servantsPage"]').classList.remove('hidden-view');
             DOMElements.sidebarLinks.querySelector('[data-page="attendancePage"]').classList.remove('hidden-view');
-            DOMElements.activityAnalysisLink.classList.add('hidden-view');
+            DOMElements.sidebarLinks.querySelector('[data-page="calendarPage"]').classList.remove('hidden-view');
+            DOMElements.announcementsBoardLink.classList.add('hidden-view');
+            DOMElements.correspondenceLink.classList.add('hidden-view');
             DOMElements.followUpLink.classList.add('hidden-view');
+            DOMElements.serviceAnnouncementsLink.classList.add('hidden-view');
+            // [FIX] Refresh the badges on the main services grid when returning to it
+            updateServiceCardBadges();
         }
         
         async function switchPage(pageId) {
@@ -887,7 +1072,7 @@
             const activeLink = DOMElements.sidebarLinks.querySelector(`.sidebar-link[data-page="${pageId}"]`);
             if (activeLink) {
                 activeLink.classList.add('active');
-                DOMElements.mobilePageTitle.textContent = activeLink.innerText;
+                DOMElements.mobilePageTitle.textContent = activeLink.querySelector('span')?.textContent || activeLink.innerText;
             }
 
             if (window.innerWidth < 768) {
@@ -896,11 +1081,79 @@
             }
             
             if (pageId === 'homePage') updateHomePageDashboard();
+            if (pageId === 'announcementsBoardPage') renderAdminAnnouncementsList(allAnnouncementsCache);
+            if (pageId === 'correspondencePage') markNotesAsRead();
             if (pageId === 'followUpPage') updateFollowUpPage();
             if (pageId === 'servantsPage') displayUpcomingBirthdays();
             if (pageId === 'attendancePage' && !isGeneralSecretaryMode) loadAttendancePage();
-            if (pageId === 'reportsPage') loadReportsPage();
-            if (pageId === 'activityAnalysisPage') initializeActivityAnalysisPage();
+if (pageId === 'calendarPage') { // تم التعديل هنا
+    loadCalendarPage();
+    // لا تقم باستدعاء listenForCalendarEvents هنا، سيتم استدعاؤها من داخل loadCalendarPage أو عند تغيير الفلتر
+}            if (pageId === 'reportsPage') loadReportsPage();
+            if (pageId === 'serviceAnnouncementsPage') markServiceAnnouncementsAsRead();
+        }
+
+        function listenForUnreadNotesForBadge() {
+            if (isLocalMode) return;
+            const notesColRef = collection(db, 'notesToAdmin');
+            const q = query(notesColRef, where('isRead', '==', false));
+
+            onSnapshot(q, (snapshot) => {
+                const unreadCount = snapshot.size;
+                const adminBadgeId = `service-badge-${"الامين العام".replace(/\s+/g, '-')}`;
+                const adminBadge = document.getElementById(adminBadgeId);
+                if (adminBadge) {
+                    if (unreadCount > 0) {
+                        adminBadge.textContent = unreadCount;
+                        adminBadge.classList.remove('hidden-view');
+                    } else {
+                        adminBadge.classList.add('hidden-view');
+                    }
+                }
+            }, (error) => {
+                console.error("Error listening for notes for badge:", error);
+            });
+        }
+
+        async function updateServiceCardBadges() {
+            await authReady;
+            if (isLocalMode) return;
+
+            try {
+                // The logic for the admin badge has been moved to its own real-time listener `listenForUnreadNotesForBadge`
+                // This function now only handles announcement badges for regular services.
+
+                // Update Service Badges for announcements
+                const announcementsCol = collection(db, 'announcements');
+                const announcementsSnapshot = await getDocs(query(announcementsCol, orderBy('timestamp', 'desc')));
+                const allAnnouncements = announcementsSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+                
+                const servicesToCheck = services.filter(s => s.name !== 'الامين العام');
+                servicesToCheck.forEach(service => {
+                    const serviceName = service.name;
+                    const lastReadTimestamp = getLocalData(`lastReadAnn-${serviceName}`) || 0;
+
+                    const relevantAnnouncements = allAnnouncements.filter(ann => 
+                        ann.targetServices && (ann.targetServices.includes('all') || ann.targetServices.includes(serviceName))
+                    );
+
+                    const unreadCount = relevantAnnouncements.filter(ann => ann.timestamp?.toMillis() > lastReadTimestamp).length;
+                    
+                    const serviceBadgeId = `service-badge-${serviceName.replace(/\s+/g, '-')}`;
+                    const serviceBadge = document.getElementById(serviceBadgeId);
+                    if (serviceBadge) {
+                        if (unreadCount > 0) {
+                            serviceBadge.textContent = unreadCount;
+                            serviceBadge.classList.remove('hidden-view');
+                        } else {
+                            serviceBadge.classList.add('hidden-view');
+                        }
+                    }
+                });
+
+            } catch (error) {
+                console.error("Failed to update service card badges:", error);
+            }
         }
 
         // --- DATA FETCHING ---
@@ -976,32 +1229,50 @@
             }
         }
         
-        async function loadAllServicesData() {
-            await authReady;
-            showLoading(true);
-            allServantsCache = [];
-            allAttendanceCache = [];
-            const servicesToFetch = services.filter(s => s.name !== 'الامين العام');
-            
-            for (const service of servicesToFetch) {
-                const serviceName = service.name;
-                const [serviceServants, serviceAttendance] = await Promise.all([
-                    fetchData('servants', serviceName),
-                    fetchData('attendance', serviceName)
-                ]);
+// --- الكود الجديد (السريع والمحسّن) ---
+async function loadAllServicesData() {
+    await authReady;
+    showLoading(true);
+    allServantsCache = [];
+    allAttendanceCache = [];
+    const servicesToFetch = services.filter(s => s.name !== 'الامين العام');
+
+    try {
+        // الخطوة 1: نُجهّز قائمة بكل طلبات البيانات التي نريدها (بدون تنفيذها بعد).
+        const allPromises = servicesToFetch.map(service => {
+            const serviceName = service.name;
+            // كل طلب سيقوم بجلب ملفي الخدام والحضور للخدمة.
+            return Promise.all([
+                fetchData('servants', serviceName),
+                fetchData('attendance', serviceName)
+            ]).then(([serviceServants, serviceAttendance]) => {
+                // عندما تعود البيانات، نجهزها بإضافة اسم الخدمة.
                 const attendanceArray = Object.entries(serviceAttendance).map(([date, data]) => ({ date, ...data, serviceName }));
                 serviceServants.forEach(s => s.serviceName = serviceName);
-                
-                allServantsCache.push(...serviceServants);
-                allAttendanceCache.push(...attendanceArray);
+                return { serviceServants, attendanceArray };
+            });
+        });
 
-                renderAdminServantsTable(allServantsCache.sort((a, b) => a.name.localeCompare(b.name, 'ar')));
-                updateAdminDashboard();
-            }
-            
-            showLoading(false);
-        }
+        // الخطوة 2: نرسل كل الطلبات دفعة واحدة وننتظر حتى تكتمل جميعها.
+        const allResults = await Promise.all(allPromises);
 
+        // الخطوة 3: الآن بعد أن وصلت كل البيانات، نجمعها في مكان واحد.
+        allResults.forEach(result => {
+            allServantsCache.push(...result.serviceServants);
+            allAttendanceCache.push(...result.attendanceArray);
+        });
+
+        // الخطوة 4: نحدّث الواجهة مرة واحدة فقط بعد اكتمال كل شيء.
+        renderAdminServantsTable(allServantsCache.sort((a, b) => a.name.localeCompare(b.name, 'ar')));
+        updateAdminDashboard();
+
+    } catch (error) {
+        console.error("Error loading all services data in parallel:", error);
+        showMessage("حدث خطأ أثناء تحميل البيانات الشاملة.", true);
+    } finally {
+        showLoading(false);
+    }
+}
 
         // --- SERVANTS FUNCTIONS ---
         function renderServantsTable(servantsToRender) {
@@ -1178,14 +1449,32 @@
         }
 
         // --- ATTENDANCE FUNCTIONS ---
-        function loadAttendancePage() {
-            DOMElements.yearSelector.innerHTML = '<option value="">اختر سنة</option>';
-            for (let i = 2030; i >= 2025; i--) {
+        async function loadAttendancePage() {
+            // Populate years, e.g., from 2024 to 5 years from now
+            DOMElements.yearSelector.innerHTML = '';
+            const today = new Date();
+            const currentYear = today.getFullYear();
+            const startYear = 2024;
+            const endYear = currentYear + 5;
+            for (let i = endYear; i >= startYear; i--) {
                 DOMElements.yearSelector.innerHTML += `<option value="${i}">${i}</option>`;
             }
-            DOMElements.monthSelector.innerHTML = '<option value="">اختر شهر</option>';
-            DOMElements.monthSelector.disabled = true;
-            DOMElements.fridaysGrid.innerHTML = '';
+            
+            // Set defaults to current year and month
+            const currentMonth = today.getMonth();
+            DOMElements.yearSelector.value = currentYear;
+            
+            showLoading(true);
+            await loadAttendanceForYear(currentYear);
+            showLoading(false);
+            
+            populateMonths(currentYear);
+            DOMElements.monthSelector.value = currentMonth;
+            DOMElements.monthSelector.disabled = false;
+            
+            populateFridaysGrid(currentYear, currentMonth);
+
+            // Clear the rest of the UI
             DOMElements.activityButtons.classList.add('hidden-view');
             DOMElements.attendanceListContainer.classList.add('hidden-view');
         }
@@ -1267,14 +1556,23 @@
             const displayDate = new Date(year, month - 1, day);
             const formattedDate = displayDate.toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
+// ... داخل الدالة showActivityChecklist
             DOMElements.attendanceListTitle.textContent = `تسجيل حضور: ${activity.name} - ${formattedDate}`;
             DOMElements.servantsChecklist.innerHTML = '';
-            
-            DOMElements.noActivityCheck.checked = false;
-            DOMElements.noActivityReason.value = '';
-            DOMElements.noActivityReason.classList.add('hidden');
-            DOMElements.noActivityLabel.textContent = `لا يوجد ${activity.name} لهذا اليوم`;
-            DOMElements.servantsChecklist.classList.remove('hidden');
+
+            // الشيفرة المحدثة لإدارة عرض قسم "لا يوجد نشاط"
+            const noActivitySection = document.getElementById('noActivitySection');
+            if (activityKey === 'apology') {
+                noActivitySection.classList.add('hidden-view');
+            } else {
+                noActivitySection.classList.remove('hidden-view');
+                DOMElements.noActivityCheck.checked = false;
+                DOMElements.noActivityReason.value = '';
+                DOMElements.noActivityReason.classList.add('hidden');
+                DOMElements.noActivityLabel.textContent = `لا يوجد ${activity.name} لهذا اليوم`;
+                DOMElements.servantsChecklist.classList.remove('hidden');
+            }
+            // نهاية الشيفرة المحدثة
 
             const dayData = attendanceYearCache[date] || {};
             const activityData = dayData[activityKey] || {};
@@ -1339,6 +1637,342 @@
             if (!isNaN(currentYear) && !isNaN(currentMonth)) {
                 populateFridaysGrid(currentYear, currentMonth);
             }
+        }
+
+       // --- CALENDAR FUNCTIONS ---
+function listenForCalendarEvents(serviceNameToListen) {
+    if (isLocalMode) {
+        // Local mode logic can be expanded later if needed.
+        return;
+    }
+
+    if (calendarEventsUnsubscribe) calendarEventsUnsubscribe();
+
+    // If no service is selected (e.g., admin first opens the page), clear the calendar.
+    if (!serviceNameToListen) {
+         calendarEventsCache = {};
+         const year = parseInt(DOMElements.calendarYearSelector.value);
+         const month = parseInt(DOMElements.calendarMonthSelector.value);
+         if (!isNaN(year) && !isNaN(month)) renderCalendar(year, month);
+         return;
+    }
+
+    if (serviceNameToListen === 'all') {
+        // --- Logic to fetch ALL events for the admin ---
+        const servicesToFetch = services.filter(s => s.name !== 'الامين العام');
+        const eventsPromises = servicesToFetch.map(s => 
+            getDocs(collection(db, 'services', s.name, 'calendarEvents'))
+        );
+
+        Promise.all(eventsPromises).then(snapshotsArray => {
+            calendarEventsCache = {};
+            snapshotsArray.forEach((snapshot, index) => {
+                const serviceName = servicesToFetch[index].name;
+                snapshot.docs.forEach(doc => {
+                    const eventData = doc.data();
+eventData.serviceName = serviceName; // Important: Add service name to the event
+eventData.date = doc.id; // [سطر جديد] هذا السطر يخزن تاريخ الحدث داخل بياناته
+calendarEventsCache[doc.id + '_' + serviceName] = eventData; // Use unique key
+                });
+            });
+            const year = parseInt(DOMElements.calendarYearSelector.value);
+            const month = parseInt(DOMElements.calendarMonthSelector.value);
+            if (!isNaN(year) && !isNaN(month)) {
+                renderCalendar(year, month);
+            }
+        });
+
+    } else {
+        // --- Original logic for a SINGLE service ---
+        const eventsCol = collection(db, 'services', serviceNameToListen, 'calendarEvents');
+        calendarEventsUnsubscribe = onSnapshot(eventsCol, (snapshot) => {
+            calendarEventsCache = {};
+        
+        snapshot.docs.forEach(doc => {
+        const eventData = doc.data();
+        eventData.date = doc.id; // إضافة تاريخ الحدث
+        eventData.serviceName = serviceNameToListen; // إضافة اسم الخدمة
+        calendarEventsCache[doc.id] = eventData;
+        });
+            const year = parseInt(DOMElements.calendarYearSelector.value);
+            const month = parseInt(DOMElements.calendarMonthSelector.value);
+            if (!isNaN(year) && !isNaN(month)) {
+                renderCalendar(year, month);
+            }
+        }, (error) => {
+            console.error("Error listening for calendar events:", error);
+        });
+    }
+}
+function loadCalendarPage() {
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth();
+    const startYear = 2024;
+    const endYear = currentYear + 5;
+
+    // Populate Year Selector
+    DOMElements.calendarYearSelector.innerHTML = '';
+    for (let i = endYear; i >= startYear; i--) {
+        DOMElements.calendarYearSelector.innerHTML += `<option value="${i}">${i}</option>`;
+    }
+    DOMElements.calendarYearSelector.value = currentYear;
+
+    // Populate Month Selector
+    const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+    DOMElements.calendarMonthSelector.innerHTML = '';
+    months.forEach((month, index) => {
+        DOMElements.calendarMonthSelector.innerHTML += `<option value="${index}">${month}</option>`;
+    });
+    DOMElements.calendarMonthSelector.value = currentMonth;
+
+    // --- التعديل الرئيسي يبدأ هنا ---
+    if (isGeneralSecretaryMode) {
+        // إذا كان المستخدم هو الأمين العام
+        DOMElements.calendarServiceFilterContainer.classList.remove('hidden-view'); // أظهر فلتر الخدمات
+
+        // قم بتعبئة الفلتر بأسماء الخدمات وخيار "الكل"
+        DOMElements.calendarServiceSelector.innerHTML = '<option value="">-- اختر خدمة --</option>';
+        DOMElements.calendarServiceSelector.innerHTML += '<option value="all">-- عرض الكل --</option>'; // إضافة خيار الكل
+        const serviceNames = services.filter(s => s.name !== 'الامين العام').map(s => s.name);
+        serviceNames.sort((a,b) => a.localeCompare(b,'ar')).forEach(name => {
+            DOMElements.calendarServiceSelector.innerHTML += `<option value="${name}">${name}</option>`;
+        });
+        // اعرض رسالة أولية في التقويم
+        DOMElements.calendarContent.innerHTML = '<p class="text-center text-gray-500">الرجاء اختيار خدمة لعرض تقويمها.</p>';
+
+    } else {
+        // إذا كان المستخدم أمين خدمة عادي
+        DOMElements.calendarServiceFilterContainer.classList.add('hidden-view'); // أبقِ الفلتر مخفياً
+        renderCalendar(currentYear, currentMonth); // اعرض تقويم خدمته مباشرة
+        listenForCalendarEvents(currentServiceName); // ابدأ الاستماع لأحداث خدمته
+    }
+}
+        function renderCalendar(year, month) {
+            const calendarContainer = DOMElements.calendarContent;
+            calendarContainer.innerHTML = ''; // Clear previous calendar
+
+            const dayNames = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+
+            const firstDayOfMonth = new Date(year, month, 1).getDay(); // 0 = Sunday, 1 = Monday...
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            // Create table structure
+            const table = document.createElement('table');
+            table.className = 'w-full border-collapse text-center';
+            
+            // Create header row
+            let thead = '<thead><tr class="bg-gray-100 dark:bg-gray-700">';
+            dayNames.forEach(day => {
+                thead += `<th class="p-2 md:p-4 border dark:border-gray-600">${day}</th>`;
+            });
+            thead += '</tr></thead>';
+            table.innerHTML += thead;
+
+            // Create day cells
+            let tbody = '<tbody><tr>';
+            let dayCounter = 1;
+
+            // Blank cells for the start of the month
+            for (let i = 0; i < firstDayOfMonth; i++) {
+                tbody += '<td class="p-2 md:p-4 border dark:border-gray-600 h-24 bg-gray-50 dark:bg-gray-800/50"></td>';
+            }
+
+            // Fill in the days
+            let currentDay = firstDayOfMonth;
+            while (dayCounter <= daysInMonth) {
+                if (currentDay === 7) {
+                    currentDay = 0;
+                    tbody += '</tr><tr>';
+                }
+                
+                const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(dayCounter).padStart(2, '0')}`;
+                const event = calendarEventsCache[dateString];
+
+                const isFriday = currentDay === 5;
+                const isToday = new Date().toDateString() === new Date(year, month, dayCounter).toDateString();
+                
+                let cellClasses = 'p-2 md:p-4 border dark:border-gray-600 h-28 align-top relative transition-colors cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700';
+                if (isFriday) cellClasses += ' bg-cyan-50 dark:bg-cyan-900/40';
+                if (isToday) cellClasses += ' border-2 border-red-500';
+
+                // الكود الجديد
+let eventHTML = '';
+const isAggregatedView = isGeneralSecretaryMode && DOMElements.calendarServiceSelector.value === 'all';
+
+if (isAggregatedView) {
+    // --- منطق جديد لعرض "الكل" كنقاط ملونة ---
+    const dayEvents = Object.values(calendarEventsCache).filter(cachedEvent => cachedEvent.date === dateString);
+    if (dayEvents.length > 0) {
+        eventHTML = `<div class="absolute bottom-1 right-1 left-1 flex justify-center items-center flex-wrap gap-1 p-0.5">`;
+        dayEvents.slice(0, 4).forEach(event => { // عرض 4 نقاط كحد أقصى
+            const color = eventTypeColors[event.eventType] || 'bg-gray-500';
+            eventHTML += `<span class="block w-3 h-3 rounded-full ${color} border border-white/50" title="${event.serviceName}: ${event.eventType}"></span>`;
+        });
+        if (dayEvents.length > 4) {
+            eventHTML += `<span class="text-xs font-bold text-gray-700 dark:text-gray-300">+${dayEvents.length - 4}</span>`;
+        }
+        eventHTML += `</div>`;
+    }
+} else {
+    // --- المنطق الأصلي لعرض خدمة واحدة ---
+    const event = calendarEventsCache[dateString];
+    if (event) {
+        const color = eventTypeColors[event.eventType] || 'bg-gray-500';
+        eventHTML = `
+            <div class="absolute bottom-1 right-1 left-1 p-1 rounded-md text-white text-xs truncate ${color}" title="${event.eventType}: ${event.eventDetails}">
+                <i class="fas fa-calendar-check ml-1"></i> ${event.eventType}
+            </div>
+        `;
+    }
+}
+
+                tbody += `
+                    <td class="${cellClasses}" data-date="${dateString}">
+                        <div class="font-bold ${isToday ? 'text-red-500' : ''}">${dayCounter}</div>
+                        ${eventHTML}
+                    </td>`;
+                
+                dayCounter++;
+                currentDay++;
+            }
+
+            // Blank cells for the end of the month
+            while (currentDay < 7) {
+                tbody += '<td class="p-2 md:p-4 border dark:border-gray-600 h-24 bg-gray-50 dark:bg-gray-800/50"></td>';
+                currentDay++;
+            }
+
+            tbody += '</tr></tbody>';
+            table.innerHTML += tbody;
+            
+            calendarContainer.appendChild(table);
+        }
+
+        function openEventModal(dateString) {
+            const form = DOMElements.calendarEventForm;
+            form.reset();
+            DOMElements.eventDate.value = dateString;
+            const [y, m, d] = dateString.split('-');
+            DOMElements.eventModalDate.textContent = `${d}/${m}/${y}`;
+            
+            const existingEvent = calendarEventsCache[dateString];
+            if (existingEvent) {
+                DOMElements.eventTypeSelector.value = existingEvent.eventType;
+                DOMElements.eventDetailsInput.value = existingEvent.eventDetails;
+                DOMElements.deleteEventBtn.classList.remove('hidden-view');
+            } else {
+                DOMElements.deleteEventBtn.classList.add('hidden-view');
+            }
+            
+            openModal(DOMElements.calendarEventModal);
+        }
+        // === أضف الكود الجديد هنا ===
+function showAggregatedEventsModal(dateString) {
+    const dayEvents = Object.values(calendarEventsCache).filter(cachedEvent => cachedEvent.date === dateString);
+
+    if (dayEvents.length === 0) return;
+
+    const [y, m, d] = dateString.split('-');
+    const displayDate = new Date(y, m - 1, d);
+    const formattedDate = displayDate.toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+    DOMElements.aggregatedEventsModalTitle.textContent = `ملخص أحداث: ${formattedDate}`;
+
+    let eventsHTML = '';
+    dayEvents.forEach(event => {
+        const colorClass = eventTypeColors[event.eventType] || 'bg-gray-500';
+        const colorValue = getComputedStyle(document.documentElement).getPropertyValue(event.color) || '#9ca3af';
+
+        eventsHTML += `
+            <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 border-r-4" style="border-color: ${colorValue}">
+                <div class="flex justify-between items-center">
+                    <h4 class="font-bold text-lg flex items-center">
+                        <span class="block w-4 h-4 rounded-full ${colorClass} ml-3"></span>
+                        ${event.eventType}
+                    </h4>
+                    <span class="text-sm font-semibold text-cyan-600 dark:text-cyan-400">${event.serviceName}</span>
+                </div>
+                ${event.eventDetails ? `<p class="mt-2 text-sm text-gray-600 dark:text-gray-400 pr-7">${event.eventDetails}</p>` : ''}
+            </div>
+        `;
+    });
+
+    DOMElements.aggregatedEventsModalBody.innerHTML = eventsHTML;
+    openModal(DOMElements.aggregatedEventsModal);
+}
+
+        async function handleEventFormSubmit(e) {
+            e.preventDefault();
+            await authReady;
+            const dateString = DOMElements.eventDate.value;
+            const eventData = {
+                eventType: DOMElements.eventTypeSelector.value,
+                eventDetails: DOMElements.eventDetailsInput.value.trim(),
+                year: parseInt(dateString.substring(0, 4))
+            };
+
+            if (!eventData.eventType) {
+                return showMessage("الرجاء اختيار نوع النشاط.", true);
+            }
+            
+            showLoading(true);
+
+            if (isLocalMode) {
+                calendarEventsCache[dateString] = eventData;
+                setLocalData(`church-app-calendar-${currentServiceName}`, calendarEventsCache);
+                const year = parseInt(DOMElements.calendarYearSelector.value);
+                const month = parseInt(DOMElements.calendarMonthSelector.value);
+                renderCalendar(year, month);
+            } else {
+                try {
+const targetService = isGeneralSecretaryMode ? DOMElements.calendarServiceSelector.value : currentServiceName;
+if (!targetService || targetService === 'all') {
+    closeModal(DOMElements.calendarEventModal);
+    return showMessage("لحفظ أو تعديل حدث، الرجاء اختيار خدمة محددة من القائمة.", true);
+}
+const eventDocRef = doc(db, 'services', targetService, 'calendarEvents', dateString);                    await setDoc(eventDocRef, eventData);
+                } catch (error) {
+                    console.error("Error saving event:", error);
+                    showMessage("فشل حفظ الحدث.", true);
+                }
+            }
+            
+            showLoading(false);
+            closeModal(DOMElements.calendarEventModal);
+            showMessage("تم حفظ الحدث بنجاح.");
+        }
+
+        async function deleteCalendarEvent() {
+            const dateString = DOMElements.eventDate.value;
+            if (!dateString) return;
+
+            showConfirm('تأكيد الحذف', 'هل أنت متأكد من حذف هذا الحدث؟', async () => {
+                showLoading(true);
+                if (isLocalMode) {
+                    delete calendarEventsCache[dateString];
+                    setLocalData(`church-app-calendar-${currentServiceName}`, calendarEventsCache);
+                    const year = parseInt(DOMElements.calendarYearSelector.value);
+                    const month = parseInt(DOMElements.calendarMonthSelector.value);
+                    renderCalendar(year, month);
+                } else {
+                    try {
+                        const targetService = isGeneralSecretaryMode ? DOMElements.calendarServiceSelector.value : currentServiceName;
+if (!targetService || targetService === 'all') {
+     closeModal(DOMElements.calendarEventModal);
+     return showMessage("لحذف حدث، الرجاء اختيار خدمة محددة من القائمة.", true);
+}
+const eventDocRef = doc(db, 'services', targetService, 'calendarEvents', dateString);
+                        await deleteDoc(eventDocRef);
+                    } catch (error) {
+                        console.error("Error deleting event:", error);
+                        showMessage("فشل حذف الحدث.", true);
+                    }
+                }
+                showLoading(false);
+                closeModal(DOMElements.calendarEventModal);
+                showMessage("تم حذف الحدث بنجاح.");
+            });
         }
 
         // --- REPORTS FUNCTIONS ---
@@ -2017,8 +2651,10 @@
                     if (serviceActivity.note) {
                         lastFridayAbsenceContainer.innerHTML = `<p class="text-yellow-600 dark:text-yellow-400 font-semibold">تم إلغاء الخدمة يوم الجمعة الماضية.</p>`;
                     } else {
-                        const attendees = new Set(serviceActivity.attendees || []);
+            const attendees = new Set(serviceActivity.attendees || []);
                         const absentees = servantsCache.filter(servant => !attendees.has(servant.id));
+                        // استخلاص معرفات الخدام المعتذرين
+                        const apologizedIds = new Set(lastFridayData.apology?.attendees || []);
                         
                         lastFridayAbsenceCountContainer.innerHTML = `
                             <span class="font-bold text-xl ${absentees.length > 0 ? 'text-red-500' : 'text-green-500'}">${absentees.length}</span>
@@ -2028,10 +2664,22 @@
                         if (absentees.length > 0) {
                             let listHTML = `<div class="overflow-y-auto" style="max-height: 140px;"><ul class="pr-2">`;
                             absentees.forEach(servant => {
-                                listHTML += `<li class="font-semibold text-red-700 dark:text-red-400 flex items-center p-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"><i class="fas fa-times-circle text-red-400 ml-3 flex-shrink-0"></i><span class="truncate">${servant.name}</span></li>`;
+                                const isApology = apologizedIds.has(servant.id);
+                                const apologyBadge = isApology 
+                                    ? '<span class="text-xs bg-gray-500 text-white rounded-full px-2 py-0.5 mr-auto">معتذر</span>' 
+                                    : '';
+
+                                listHTML += `
+                                    <li class="font-semibold text-red-700 dark:text-red-400 flex items-center p-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors">
+                                        <i class="fas fa-times-circle text-red-400 ml-3 flex-shrink-0"></i>
+                                        <span class="truncate">${servant.name}</span>
+                                        ${apologyBadge}
+                                    </li>`;
                             });
                             listHTML += `</ul></div>`;
                             lastFridayAbsenceContainer.innerHTML = listHTML;
+// ...
+
                         } else {
                             lastFridayAbsenceContainer.innerHTML = `<p class="text-green-600 dark:text-green-400 font-semibold flex items-center mt-2"><i class="fas fa-check-circle ml-2"></i>لا يوجد غياب! كل الخدام حضروا الخدمة.</p>`;
                         }
@@ -2137,308 +2785,197 @@
 
             openModal(DOMElements.activityAttendeesModal);
         }
+        
+        // --- [NEW/MODIFIED] FUNCTIONS FOR SECRETARY GENERAL & ANNOUNCEMENTS ---
+        // ==================================================================
 
+        async function sendNoteToAdmin() {
+            const input = DOMElements.noteToAdminInput;
+            const text = input.value.trim();
+            if (!text) return showMessage('لا يمكنك إرسال ملاحظة فارغة.', true);
 
-        // --- EVENT LISTENERS INITIALIZATION ---
-        function initializeEventListeners() {
-            // Main navigation
-            DOMElements.loginForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                DOMElements.errorMessage.textContent = '';
-                const isAdminLogin = currentServiceName === 'الامين العام';
-                isGeneralSecretaryMode = false;
-                if (isAdminLogin && DOMElements.codeInput.value === ADMIN_CODE) {
-                    isGeneralSecretaryMode = true;
-                    closeModal(DOMElements.loginModal);
-                    DOMElements.codeInput.value = '';
-                    await showDashboard();
-                } else if (!isAdminLogin && DOMElements.codeInput.value === CORRECT_CODE) {
-                    closeModal(DOMElements.loginModal);
-                    DOMElements.codeInput.value = '';
-                    await showDashboard();
-                } else {
-                    DOMElements.errorMessage.textContent = 'الكود غير صحيح. حاول مرة أخرى.';
-                }
-            });
+            showLoading(true);
+            const noteData = {
+                text: text,
+                senderService: currentServiceName,
+                senderId: userId,
+                timestamp: serverTimestamp(),
+                isRead: false
+            };
 
-            DOMElements.sidebar.addEventListener('click', (e) => {
-                const link = e.target.closest('.sidebar-link');
-                if (link) { e.preventDefault(); switchPage(link.dataset.page); }
-            });
-            
-            DOMElements.logoutBtn.addEventListener('click', returnToMainMenu);
-            DOMElements.backToServicesBtn.addEventListener('click', returnToMainMenu);
-            
-            DOMElements.servicesGrid.addEventListener('click', (e) => {
-                const card = e.target.closest('.service-card');
-                if (card) {
-                    currentServiceName = card.dataset.serviceName;
-                    document.getElementById('modalTitle').textContent = `الدخول إلى ${currentServiceName}`;
-                    openModal(DOMElements.loginModal);
-                    setTimeout(() => DOMElements.codeInput.focus(), 100);
-                }
-            });
-            
-            document.querySelectorAll('.close-modal-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => closeModal(e.target.closest('.modal-backdrop')));
-            });
+            try {
+                const notesColRef = collection(db, 'notesToAdmin');
+                await addDoc(notesColRef, noteData);
+                input.value = '';
+                showMessage('تم إرسال الملاحظة بنجاح.');
+            } catch (error) {
+                console.error("Error sending note:", error);
+                showMessage("فشل إرسال الملاحظة.", true);
+            } finally {
+                showLoading(false);
+            }
+        }
 
-            // Home Page Listeners
-            DOMElements.backupBtn.addEventListener('click', backupData);
-            DOMElements.restoreBtn.addEventListener('click', restoreData);
-            DOMElements.quickAddServant.addEventListener('click', () => {
-                 DOMElements.manualEntryForm.reset();
-                DOMElements.manualEntryForm.querySelector('#servantId').value = '';
-                DOMElements.manualEntryModalTitle.textContent = 'إضافة خادم جديد';
-                DOMElements.imagePreview.classList.add('hidden');
-                DOMElements.imagePreview.src = '';
-                openModal(DOMElements.manualEntryModal);
-            });
-            DOMElements.quickGoToAttendance.addEventListener('click', () => switchPage('attendancePage'));
-            DOMElements.adminSearchInput.addEventListener('input', (e) => {
-                const searchTerm = e.target.value.toLowerCase().trim();
-                const filteredServants = allServantsCache.filter(servant => 
-                    (servant.name && servant.name.toLowerCase().includes(searchTerm)) ||
-                    (servant.mobile && String(servant.mobile).includes(searchTerm))
-                );
-                renderAdminServantsTable(filteredServants);
-            });
-            DOMElements.addAnnouncementBtn.addEventListener('click', addAnnouncement);
-            DOMElements.adminServantsTableBody.addEventListener('click', (e) => {
-                if(e.target.tagName === 'A' && e.target.dataset.servantId) {
-                    e.preventDefault();
-                    showUnifiedProfile(e.target.dataset.servantId);
-                }
-            });
-            DOMElements.totalServantsCard.addEventListener('click', () => switchPage('servantsPage'));
-            DOMElements.lastFridayStatusContainer.addEventListener('click', (e) => {
-                const card = e.target.closest('.activity-status-card');
-                if (card) {
-                    const activityKey = card.dataset.activityKey;
-                    showActivityAttendees(activityKey);
-                }
-            });
+        function listenForSentNotes() {
+            if (notesUnsubscribe) notesUnsubscribe();
+            const notesColRef = collection(db, 'notesToAdmin');
+            const q = query(notesColRef, where('senderService', '==', currentServiceName), orderBy('timestamp', 'desc'));
 
-
-            // Servants Page Listeners
-            DOMElements.searchInput.addEventListener('input', (e) => {
-                const searchTerm = e.target.value.toLowerCase().trim();
-                const filteredServants = servantsCache.filter(servant => 
-                    (servant.name && servant.name.toLowerCase().includes(searchTerm)) ||
-                    (servant.mobile && String(servant.mobile).includes(searchTerm))
-                );
-                renderServantsTable(filteredServants);
-            });
-            DOMElements.servantsActions.querySelector('#addManualBtn').addEventListener('click', () => {
-                DOMElements.manualEntryForm.reset();
-                DOMElements.manualEntryForm.querySelector('#servantId').value = '';
-                DOMElements.manualEntryModalTitle.textContent = 'إضافة خادم جديد';
-                DOMElements.imagePreview.classList.add('hidden');
-                DOMElements.imagePreview.src = '';
-                openModal(DOMElements.manualEntryModal);
-            });
-            DOMElements.servantsActions.querySelector('#importExcelBtn').addEventListener('click', () => openModal(DOMElements.importModal));
-            DOMElements.manualEntryForm.addEventListener('submit', handleServantFormSubmit);
-            DOMElements.importForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const file = DOMElements.importForm.querySelector('#excelFile').files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = async (event) => {
-                    try {
-                        showLoading(true);
-                        const data = new Uint8Array(event.target.result);
-                        const workbook = window.XLSX.read(data, { type: 'array' });
-                        const firstSheetName = workbook.SheetNames[0];
-                        const worksheet = workbook.Sheets[firstSheetName];
-                        const json = window.XLSX.utils.sheet_to_json(worksheet, { 
-                            header: ['id', 'image', 'name', 'nationalId', 'mobile', 'currentService', 'address', 'dob', 'qualification', 'job', 'confessionFather'],
-                            range: 4 
-                        });
-                        
-                        let importedCount = 0;
-                        for (const servant of json) {
-                            if (!servant.name) continue;
-                            if (servant.dob && !isNaN(servant.dob)) {
-                                const dobNumber = Number(servant.dob);
-                                if (dobNumber > 1) {
-                                    const excelDate = new Date((dobNumber - 25569) * 86400 * 1000);
-                                    if (!isNaN(excelDate.getTime())) {
-                                        servant.dob = excelDate.toISOString().split('T')[0];
-                                    } else {
-                                        servant.dob = null;
-                                    }
-                                }
-                            }
-                            await addServant(servant);
-                            importedCount++;
-                        }
-                        closeModal(DOMElements.importModal);
-                        DOMElements.importForm.reset();
-                        showMessage(`تم استيراد ${importedCount} خادم بنجاح.`);
-                    } catch (err) {
-                        showMessage('حدث خطأ أثناء قراءة الملف.', true);
-                        console.error(err);
-                    } finally {
-                        showLoading(false);
-                    }
-                };
-                reader.readAsArrayBuffer(file);
-            });
-            DOMElements.servantsTableBody.addEventListener('click', (e) => {
-                const editBtn = e.target.closest('.edit-btn');
-                const deleteBtn = e.target.closest('.delete-btn');
-                if (editBtn) handleEditClick(editBtn.dataset.id);
-                if (deleteBtn) deleteServant(deleteBtn.dataset.id);
-            });
-
-            DOMElements.servantImageFile.addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = (event) => {
-                        const img = new Image();
-                        img.onload = () => {
-                            const canvas = document.createElement('canvas');
-                            const MAX_WIDTH = 300;
-                            const MAX_HEIGHT = 300;
-                            let width = img.width;
-                            let height = img.height;
-
-                            if (width > height) {
-                                if (width > MAX_WIDTH) {
-                                    height *= MAX_WIDTH / width;
-                                    width = MAX_WIDTH;
-                                }
-                            } else {
-                                if (height > MAX_HEIGHT) {
-                                    width *= MAX_HEIGHT / height;
-                                    height = MAX_HEIGHT;
-                                }
-                            }
-                            canvas.width = width;
-                            canvas.height = height;
-                            const ctx = canvas.getContext('2d');
-                            ctx.drawImage(img, 0, 0, width, height);
-                            
-                            const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-                            
-                            DOMElements.imagePreview.src = dataUrl;
-                            DOMElements.imagePreview.classList.remove('hidden');
-                        }
-                        img.src = event.target.result;
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-
-
-            // Attendance Page Listeners
-            DOMElements.yearSelector.addEventListener('change', async () => {
-                const year = DOMElements.yearSelector.value;
-                DOMElements.monthSelector.disabled = true;
-                DOMElements.fridaysGrid.innerHTML = '';
-                DOMElements.activityButtons.classList.add('hidden-view');
-                DOMElements.attendanceListContainer.classList.add('hidden-view');
-                if (year) {
-                    showLoading(true);
-                    await loadAttendanceForYear(year);
-                    showLoading(false);
-                    populateMonths(year);
-                } else {
-                    DOMElements.monthSelector.innerHTML = '<option value="">اختر شهر</option>';
-                }
-            });
-
-            DOMElements.monthSelector.addEventListener('change', async () => {
-                const year = parseInt(DOMElements.yearSelector.value);
-                const month = parseInt(DOMElements.monthSelector.value);
-                if (!isNaN(year) && !isNaN(month) && month >= 0) {
-                    populateFridaysGrid(year, month);
-                } else {
-                    DOMElements.fridaysGrid.innerHTML = '';
-                }
-                DOMElements.activityButtons.classList.add('hidden-view');
-                DOMElements.attendanceListContainer.classList.add('hidden-view');
-            });
-
-            DOMElements.fridaysGrid.addEventListener('click', (e) => {
-                const button = e.target.closest('.friday-btn');
-                if (button) {
-                    document.querySelectorAll('.friday-btn').forEach(btn => btn.classList.remove('active'));
-                    button.classList.add('active');
-                    selectedFriday = button.dataset.date;
-                    updateActivityButtonsStatus(selectedFriday);
-                    DOMElements.attendanceListContainer.classList.add('hidden-view');
-                }
-            });
-
-            DOMElements.activityButtons.addEventListener('click', (e) => {
-                const button = e.target.closest('.activity-btn');
-                if (button) {
-                    const activity = button.dataset.activity;
-                    if (selectedFriday) {
-                        showActivityChecklist(activity, selectedFriday);
-                    } else {
-                        showMessage("الرجاء اختيار يوم الجمعة أولاً.", true);
-                    }
-                }
-            });
-            
-            DOMElements.saveActivityAttendanceBtn.addEventListener('click', saveActivityAttendance);
-
-
-            // Reports Page Listeners
-            document.getElementById('reportTabs').addEventListener('click', (e) => {
-                const tab = e.target.closest('.report-tab');
-                if (tab) {
-                    document.querySelectorAll('.report-tab').forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active');
-                    currentReportType = tab.dataset.reportType;
-
-                    const isComparison = currentReportType === 'comparison';
-                    DOMElements.standardReportsContainer.classList.toggle('hidden-view', isComparison);
-                    DOMElements.comparisonReportContainer.classList.toggle('hidden-view', !isComparison);
-                    
-                    if (!isComparison) {
-                        DOMElements.reportOutput.classList.add('hidden-view');
-                        DOMElements.servantSelectorContainer.classList.toggle('hidden-view', currentReportType !== 'individual');
-                    }
-                }
-            });
-            DOMElements.reportServiceSelector.addEventListener('change', () => {
-                const selectedService = DOMElements.reportServiceSelector.value;
-                const filteredServants = selectedService === 'all'
-                    ? allServantsCache 
-                    : allServantsCache.filter(s => s.serviceName === selectedService);
-                populateReportServantSelector(filteredServants);
-            });
-            DOMElements.generateReportBtn.addEventListener('click', triggerReportGeneration);
-            DOMElements.generateComparisonBtn.addEventListener('click', generateComparisonReport);
-            DOMElements.exportPngBtn.addEventListener('click', exportAsImage);
-            DOMElements.exportPdfBtn.addEventListener('click', exportAsPdf);
-            
-            // Activity Analysis Page Listeners
-            DOMElements.generateAnalysisBtn.addEventListener('click', generateAbsenceAnalysis);
-            DOMElements.exportAnalysisBtn.addEventListener('click', exportAnalysisAsImage);
-
-            // Theme Toggle Listener
-            DOMElements.themeCheckbox.addEventListener('change', toggleTheme);
-
-            // Mobile Sidebar Listeners
-            DOMElements.hamburgerBtn.addEventListener('click', () => {
-                DOMElements.sidebar.classList.remove('translate-x-full');
-                DOMElements.sidebarOverlay.classList.remove('hidden');
-            });
-            DOMElements.sidebarOverlay.addEventListener('click', () => {
-                DOMElements.sidebar.classList.add('translate-x-full');
-                DOMElements.sidebarOverlay.classList.add('hidden');
+            notesUnsubscribe = onSnapshot(q, (snapshot) => {
+                const notes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderSentNotesHistory(notes);
+            }, (error) => {
+                console.error("Error listening for sent notes:", error);
             });
         }
 
-        // ==================================================================
-        // --- NEW/MODIFIED FUNCTIONS FOR SECRETARY GENERAL ---
-        // ==================================================================
+        function renderSentNotesHistory(notes) {
+            const historyContainer = DOMElements.sentNotesHistory;
+            if (!historyContainer) return;
+            historyContainer.innerHTML = '';
+
+            if (notes.length === 0) {
+                historyContainer.innerHTML = '<p class="text-gray-400 text-center text-xs p-2">لا توجد ملاحظات مرسلة.</p>';
+                return;
+            }
+
+            notes.forEach(note => {
+                const noteDate = note.timestamp ? note.timestamp.toDate() : new Date();
+                const timeString = noteDate.toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' });
+                
+                const isRead = note.isRead;
+                const readIcon = isRead 
+                    ? '<i class="fas fa-check-double text-blue-500" title="تمت القراءة"></i>' 
+                    : '<i class="fas fa-check text-gray-400" title="تم الإرسال"></i>';
+
+                const noteCard = `
+                    <div class="bg-gray-50 dark:bg-gray-700/50 p-2.5 rounded-lg text-sm flex items-start justify-between gap-2">
+                        <div>
+                            <p class="body-text text-gray-800 dark:text-gray-200 text-xs">${note.text}</p>
+                            <div class="text-xs text-gray-400 mt-2 flex items-center gap-2">
+                                <span>${timeString}</span>
+                                ${readIcon}
+                            </div>
+                        </div>
+                        <button data-id="${note.id}" class="delete-sent-note-btn text-gray-400 hover:text-red-500 transition-colors flex-shrink-0" aria-label="حذف الرسالة">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                `;
+                historyContainer.innerHTML += noteCard;
+            });
+        }
+        
+        function listenForIncomingNotes() {
+            if (incomingNotesUnsubscribe) incomingNotesUnsubscribe();
+            const notesColRef = collection(db, 'notesToAdmin');
+            const q = query(notesColRef, orderBy('timestamp', 'desc'));
+
+            incomingNotesUnsubscribe = onSnapshot(q, (snapshot) => {
+                const notes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                unreadNotes = notes.filter(note => !note.isRead);
+                updateCorrespondenceBadge(unreadNotes.length);
+                renderIncomingNotes(notes);
+            }, (error) => {
+                console.error("Error listening for incoming notes:", error);
+            });
+        }
+
+        function updateCorrespondenceBadge(count) {
+            const badge = DOMElements.correspondenceBadge;
+            if (!badge) return;
+            if (count > 0) {
+                badge.textContent = count;
+                badge.classList.remove('hidden-view');
+            } else {
+                badge.classList.add('hidden-view');
+            }
+        }
+
+        async function markNotesAsRead() {
+            if (unreadNotes.length === 0) return;
+            
+            const batch = writeBatch(db);
+            unreadNotes.forEach(note => {
+                const noteRef = doc(db, 'notesToAdmin', note.id);
+                batch.update(noteRef, { isRead: true });
+            });
+            
+            try {
+                await batch.commit();
+            } catch (error) {
+                console.error("Error marking notes as read:", error);
+            }
+        }
+        
+        async function deleteNote(noteId) {
+             await authReady;
+            showConfirm('تأكيد الحذف', 'هل أنت متأكد من حذف هذه الرسالة بشكل نهائي؟', async () => {
+                showLoading(true);
+                try {
+                    const noteDocRef = doc(db, 'notesToAdmin', noteId);
+                    await deleteDoc(noteDocRef);
+                    showMessage("تم حذف الرسالة بنجاح.");
+                } catch (error) {
+                    console.error("Error deleting note:", error);
+                    showMessage("فشل حذف الرسالة.", true);
+                } finally {
+                    showLoading(false);
+                }
+            });
+        }
+
+        async function deleteSentNote(noteId) {
+             await authReady;
+            showConfirm('تأكيد الحذف', 'هل أنت متأكد من حذف هذه الرسالة المرسلة؟', async () => {
+                showLoading(true);
+                try {
+                    const noteDocRef = doc(db, 'notesToAdmin', noteId);
+                    const noteDoc = await getDoc(noteDocRef);
+                    if (noteDoc.exists() && noteDoc.data().senderService === currentServiceName) {
+                        await deleteDoc(noteDocRef);
+                        showMessage("تم حذف الرسالة بنجاح.");
+                    } else {
+                         showMessage("لا تملك الصلاحية لحذف هذه الرسالة.", true);
+                    }
+                } catch (error) {
+                    console.error("Error deleting sent note:", error);
+                    showMessage("فشل حذف الرسالة.", true);
+                } finally {
+                    showLoading(false);
+                }
+            });
+        }
+
+        function renderIncomingNotes(notes) {
+            const container = DOMElements.incomingNotesContainer;
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (notes.length === 0) {
+                container.innerHTML = '<p class="text-gray-400 text-center text-sm p-4">لا يوجد رسائل واردة.</p>';
+                return;
+            }
+
+            notes.forEach(note => {
+                const noteDate = note.timestamp ? note.timestamp.toDate() : new Date();
+                const timeString = noteDate.toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' });
+                const isUnread = !note.isRead;
+
+                const noteCard = `
+                    <div class="relative p-3 rounded-lg transition-colors ${isUnread ? 'unread-note' : 'bg-gray-100 dark:bg-gray-700/50'}">
+                        <button data-id="${note.id}" class="delete-note-btn absolute top-2 left-2 text-gray-400 hover:text-red-500 transition-colors" aria-label="حذف الرسالة">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                        <p class="body-text text-gray-800 dark:text-gray-200">${note.text}</p>
+                        <div class="text-xs text-cyan-600 dark:text-cyan-400 mt-2 text-left font-bold">
+                            <span>${note.senderService}</span> - <span>${timeString}</span>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += noteCard;
+            });
+        }
 
         function getLastFriday() {
             const today = new Date();
@@ -2457,7 +2994,7 @@
                 dateString: `${y}-${m}-${d}`
             };
         }
-
+        
         function populateAnnouncementTargetSelector() {
             const container = document.getElementById('announcementTarget');
             if (!container) return;
@@ -2508,73 +3045,52 @@
             const announcementsCol = collection(db, 'announcements');
             const q = query(announcementsCol, orderBy('timestamp', 'desc'));
             announcementsUnsubscribe = onSnapshot(q, (snapshot) => {
-                const announcements = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                displayAnnouncements(announcements);
+                allAnnouncementsCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                if (isGeneralSecretaryMode && DOMElements.announcementsBoardPage.offsetParent !== null) {
+                    renderAdminAnnouncementsList(allAnnouncementsCache);
+                }
             });
         }
+        
+        function renderAdminAnnouncementsList(announcements) {
+             const adminList = DOMElements.adminAnnouncementsList;
+             if (!adminList) return;
 
-        function displayAnnouncements(announcements) {
-            const adminList = DOMElements.adminAnnouncementsList;
-            const userDisplay = DOMElements.announcementsDisplay;
-            
-            if (adminList && isGeneralSecretaryMode) {
-                adminList.innerHTML = '';
-                if (announcements.length === 0) {
-                    adminList.innerHTML = '<p class="text-gray-500">لا توجد إعلانات حالياً.</p>';
-                } else {
-                    announcements.forEach(ann => {
-                        const date = ann.timestamp?.toDate().toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' }) || 'غير محدد';
-                        const targets = ann.targetServices || ['غير محدد'];
-                        const targetText = targets.includes('all') ? 'الكل' : targets.join(', ');
+             adminList.innerHTML = '';
+             if (announcements.length === 0) {
+                 adminList.innerHTML = '<p class="text-gray-500">لا توجد إعلانات حالياً.</p>';
+             } else {
+                 announcements.forEach(ann => {
+                     const date = ann.timestamp?.toDate().toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' }) || 'غير محدد';
+                     const targets = ann.targetServices || ['غير محدد'];
+                     const targetText = targets.includes('all') ? 'الكل' : targets.join(', ');
 
-                        adminList.innerHTML += `
-                            <div class="bg-gray-100 dark:bg-gray-700/50 p-3 rounded-lg flex justify-between items-start gap-4">
-                                <div>
-                                    <p class="text-gray-800 dark:text-gray-200">${ann.text}</p>
-                                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-2 flex items-center gap-4">
-                                        <span><i class="fas fa-calendar-alt mr-1"></i> ${date}</span>
-                                        <span><i class="fas fa-bullseye mr-1"></i> <strong>موجه إلى:</strong> ${targetText}</span>
-                                    </div>
-                                </div>
-                                <button data-id="${ann.id}" class="delete-announcement-btn text-red-500 hover:text-red-700 text-sm flex-shrink-0">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>`;
-                    });
-                    adminList.querySelectorAll('.delete-announcement-btn').forEach(btn => {
-                        btn.addEventListener('click', async (e) => {
-                            const id = e.currentTarget.dataset.id;
-                            showConfirm('تأكيد الحذف', 'هل أنت متأكد من حذف هذا الإعلان؟', async () => {
-                                 await deleteDoc(doc(db, 'announcements', id));
-                                 showMessage('تم حذف الإعلان.');
-                            });
-                        });
-                    });
-                }
-            }
-
-            if (userDisplay && !isGeneralSecretaryMode) {
-                userDisplay.innerHTML = '';
-                const relevantAnnouncements = announcements.filter(ann => 
-                    ann.targetServices && (ann.targetServices.includes('all') || ann.targetServices.includes(currentServiceName))
-                );
-
-                if (relevantAnnouncements.length > 0) {
-                    const latestAnn = relevantAnnouncements[0];
-                    userDisplay.innerHTML = `
-                        <div class="bg-cyan-100 dark:bg-cyan-900 border-r-4 border-cyan-500 text-cyan-800 dark:text-cyan-200 p-4 rounded-lg shadow">
-                            <div class="flex items-center">
-                                <i class="fas fa-bullhorn text-2xl ml-4"></i>
-                                <div>
-                                    <h4 class="font-bold">إعلان هام من الأمين العام</h4>
-                                    <p>${latestAnn.text}</p>
-                                </div>
-                            </div>
-                        </div>`;
-                }
-            }
+                     adminList.innerHTML += `
+                         <div class="bg-white dark:bg-gray-700/50 p-3 rounded-lg flex justify-between items-start gap-4">
+                             <div>
+                                 <p class="text-gray-800 dark:text-gray-200">${ann.text}</p>
+                                 <div class="text-xs text-gray-500 dark:text-gray-400 mt-2 flex items-center gap-4">
+                                     <span><i class="fas fa-calendar-alt mr-1"></i> ${date}</span>
+                                     <span><i class="fas fa-bullseye mr-1"></i> <strong>موجه إلى:</strong> ${targetText}</span>
+                                 </div>
+                             </div>
+                             <button data-id="${ann.id}" class="delete-announcement-btn text-red-500 hover:text-red-700 text-sm flex-shrink-0">
+                                 <i class="fas fa-trash"></i>
+                             </button>
+                         </div>`;
+                 });
+                 adminList.querySelectorAll('.delete-announcement-btn').forEach(btn => {
+                     btn.addEventListener('click', async (e) => {
+                         const id = e.currentTarget.dataset.id;
+                         showConfirm('تأكيد الحذف', 'هل أنت متأكد من حذف هذا الإعلان؟', async () => {
+                              await deleteDoc(doc(db, 'announcements', id));
+                              showMessage('تم حذف الإعلان.');
+                         });
+                     });
+                 });
+             }
         }
-
+        
         async function addAnnouncement() {
             const input = DOMElements.newAnnouncementInput;
             const text = input.value.trim();
@@ -2603,44 +3119,195 @@
                 showMessage('الرجاء كتابة نص الإعلان واختيار خدمة واحدة على الأقل.', true);
             }
         }
+        
+        function listenForServiceAnnouncements() {
+            if (serviceAnnouncementsUnsubscribe) serviceAnnouncementsUnsubscribe();
+            
+            const announcementsCol = collection(db, 'announcements');
+            const q = query(announcementsCol, orderBy('timestamp', 'desc'));
 
-        function renderAdminKPIs() {
+            serviceAnnouncementsUnsubscribe = onSnapshot(q, (snapshot) => {
+                const allAnnouncements = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                const relevantAnnouncements = allAnnouncements.filter(ann => 
+                    ann.targetServices && (ann.targetServices.includes('all') || ann.targetServices.includes(currentServiceName))
+                );
+
+                const lastReadTimestamp = getLocalData(`lastReadAnn-${currentServiceName}`) || 0;
+                const unreadCount = relevantAnnouncements.filter(ann => ann.timestamp?.toMillis() > lastReadTimestamp).length;
+                
+                updateServiceAnnouncementsBadge(unreadCount);
+                renderServiceAnnouncements(relevantAnnouncements);
+
+            }, (error) => {
+                console.error("Error listening for service announcements:", error);
+            });
+        }
+
+        function updateServiceAnnouncementsBadge(count) {
+            const badge = DOMElements.serviceAnnouncementsBadge;
+            if (!badge) return;
+            if (count > 0) {
+                badge.textContent = count;
+                badge.classList.remove('hidden-view');
+            } else {
+                badge.classList.add('hidden-view');
+            }
+        }
+
+        function renderServiceAnnouncements(announcements) {
+            const container = DOMElements.bulletinBoard;
+            if (!container) return;
+            container.innerHTML = '';
+            displayedAnnouncementsCount = 0;
+
+            if (announcements.length === 0) {
+                container.innerHTML = '<p class="text-center text-white/80 col-span-full">لا توجد إعلانات لعرضها حالياً.</p>';
+                DOMElements.loadMoreAnnouncementsContainer.classList.add('hidden-view');
+                return;
+            }
+
+            const announcementsToDisplay = announcements.slice(0, ANNOUNCEMENTS_PER_PAGE);
+            displayedAnnouncementsCount = announcementsToDisplay.length;
+
+            announcementsToDisplay.forEach(ann => {
+                const date = ann.timestamp?.toDate().toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' }) || 'غير محدد';
+                const randomRotation = Math.random() * 4 - 2; // -2 to 2 degrees
+                const noteHTML = `
+                    <div class="announcement-note relative p-4 rounded-md h-48 flex flex-col" style="transform: rotate(${randomRotation}deg);">
+                        <p class="flex-grow text-gray-800 text-lg">${ann.text}</p>
+                        <p class="text-xs text-gray-500 text-left mt-2 border-t pt-1">${date}</p>
+                    </div>
+                `;
+                container.innerHTML += noteHTML;
+            });
+
+            if (announcements.length > ANNOUNCEMENTS_PER_PAGE) {
+                DOMElements.loadMoreAnnouncementsContainer.classList.remove('hidden-view');
+            } else {
+                DOMElements.loadMoreAnnouncementsContainer.classList.add('hidden-view');
+            }
+        }
+        
+        async function markServiceAnnouncementsAsRead() {
+            setLocalData(`lastReadAnn-${currentServiceName}`, Date.now());
+            updateServiceAnnouncementsBadge(0);
+        }
+
+        function loadMoreAnnouncements() {
+            const container = DOMElements.bulletinBoard;
+             const relevantAnnouncements = allAnnouncementsCache.filter(ann => 
+                ann.targetServices && (ann.targetServices.includes('all') || ann.targetServices.includes(currentServiceName))
+            );
+
+            const nextAnnouncements = relevantAnnouncements.slice(displayedAnnouncementsCount);
+            
+            nextAnnouncements.forEach(ann => {
+                const date = ann.timestamp?.toDate().toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' }) || 'غير محدد';
+                const randomRotation = Math.random() * 4 - 2;
+                const noteHTML = `
+                     <div class="announcement-note relative p-4 rounded-md h-48 flex flex-col" style="transform: rotate(${randomRotation}deg);">
+                        <p class="flex-grow text-gray-800 text-lg">${ann.text}</p>
+                        <p class="text-xs text-gray-500 text-left mt-2 border-t pt-1">${date}</p>
+                    </div>
+                `;
+                container.innerHTML += noteHTML;
+            });
+
+            displayedAnnouncementsCount += nextAnnouncements.length;
+            DOMElements.loadMoreAnnouncementsContainer.classList.add('hidden-view');
+        }
+
+        function createKpiCard(icon, title, value, subtext, bgColor, textColor) {
+            return `
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex items-center gap-4">
+                    <div class="${bgColor} p-4 rounded-full flex-shrink-0">
+                        <i class="fas fa-${icon} ${textColor} text-2xl w-8 h-8 text-center leading-8"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 dark:text-gray-400 font-bold">${title}</p>
+                        <p class="text-2xl font-bold truncate" title="${value}">${value}</p>
+                        <div class="text-gray-500 dark:text-gray-400 text-sm">${subtext}</div>
+                    </div>
+                </div>`;
+        }
+
+        function updateAdminDashboard() {
             const kpiContainer = DOMElements.kpiContainer;
-            kpiContainer.innerHTML = '';
-            kpiContainer.className = 'grid grid-cols-1 sm:grid-cols-2 gap-6';
+            if (!kpiContainer) return;
 
-            kpiContainer.innerHTML += createKpiCard('users', 'إجمالي الخدام', allServantsCache.length, 'خادم في جميع الخدمات', 'bg-blue-100 dark:bg-blue-800', 'text-blue-600');
+            // KPI 1: Total Servants
+            const totalServants = allServantsCache.length;
+            const servicesCount = services.filter(s => s.name !== "الامين العام").length;
+            const kpi1 = createKpiCard(
+                'users-cog', 
+                'إجمالي الخدام', 
+                totalServants, 
+                `في ${servicesCount} خدمة`,
+                'bg-blue-100 dark:bg-blue-900',
+                'text-blue-600 dark:text-blue-300'
+            );
 
-            const serviceAttendance = {};
-            const today = new Date();
-            const currentMonth = today.getMonth();
-            const currentYear = today.getFullYear();
-            allAttendanceCache.forEach(item => {
-                const itemDate = new Date(item.date);
-                if (itemDate.getMonth() === currentMonth && itemDate.getFullYear() === currentYear) {
-                    if (!serviceAttendance[item.serviceName]) {
-                        serviceAttendance[item.serviceName] = { totalAttendees: 0, totalPossible: 0 };
-                    }
-                    const serviceServantsCount = allServantsCache.filter(s => s.serviceName === item.serviceName).length;
-                    if (serviceServantsCount > 0) {
-                        Object.keys(item).forEach(key => {
-                            if (activityMap.has(key) && item[key].attendees) {
-                                serviceAttendance[item.serviceName].totalAttendees += item[key].attendees.length;
-                                serviceAttendance[item.serviceName].totalPossible += serviceServantsCount;
+            // KPI 2: Overall Attendance Last 30 Days
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            const startDate = thirtyDaysAgo.toISOString().split('T')[0];
+            
+            const recentAttendance = allAttendanceCache.filter(item => item.date >= startDate);
+            let totalAttendees = 0;
+            let totalPossible = 0;
+
+            recentAttendance.forEach(day => {
+                const serviceServantsCount = allServantsCache.filter(s => s.serviceName === day.serviceName).length;
+                if (serviceServantsCount > 0) {
+                    activities.forEach(activity => {
+                         const activityData = day[activity.key];
+                         if (activityData && (activityData.note === null || activityData.note === undefined)) {
+                            totalAttendees += activityData.attendees.length;
+                            totalPossible += serviceServantsCount;
+                         }
+                    });
+                }
+            });
+
+            const overallPercentage = totalPossible > 0 ? Math.round((totalAttendees / totalPossible) * 100) : 0;
+            const kpi2 = createKpiCard(
+                'chart-line',
+                'متوسط الحضور العام',
+                `${overallPercentage}%`,
+                'آخر 30 يوم',
+                'bg-green-100 dark:bg-green-900',
+                'text-green-600 dark:text-green-300'
+            );
+
+            kpiContainer.innerHTML = kpi1 + kpi2;
+        }
+
+        function updateFollowUpPage() {
+            const servantAttendanceSummary = {};
+            allServantsCache.forEach(s => servantAttendanceSummary[s.id] = { attended: 0, possible: 0, name: s.name, service: s.serviceName });
+            
+            const lastThreeMonths = new Date();
+            lastThreeMonths.setMonth(lastThreeMonths.getMonth() - 3);
+            
+            allAttendanceCache.filter(rec => new Date(rec.date) >= lastThreeMonths).forEach(item => {
+                activities.forEach(act => {
+                    if(item[act.key] && Array.isArray(item[act.key].attendees)) {
+                        const presentIds = new Set(item[act.key].attendees);
+                        const serviceServants = allServantsCache.filter(s => s.serviceName === item.serviceName);
+                        serviceServants.forEach(servant => {
+                            if (servantAttendanceSummary[servant.id]) {
+                                servantAttendanceSummary[servant.id].possible++;
+                                if(presentIds.has(servant.id)) servantAttendanceSummary[servant.id].attended++;
                             }
                         });
                     }
-                }
+                });
             });
-            let topService = { name: 'لا يوجد', avg: 0 };
-            for (const serviceName in serviceAttendance) {
-                const data = serviceAttendance[serviceName];
-                const avg = data.totalPossible > 0 ? (data.totalAttendees / data.totalPossible) * 100 : 0;
-                if (avg > topService.avg) {
-                    topService = { name: serviceName, avg: avg };
-                }
-            }
-            kpiContainer.innerHTML += createKpiCard('star', 'الخدمة الأعلى حضوراً', topService.name, `${topService.avg.toFixed(1)}% هذا الشهر`, 'bg-green-100 dark:bg-green-800', 'text-green-600');
+
+            renderAttendanceFollowUpPanel();
+            renderFollowUpPanel(servantAttendanceSummary);
+            renderBirthdaysPanel();
         }
 
         function renderFollowUpPanel(servantAttendanceSummary) {
@@ -2689,7 +3356,7 @@
                 </div>
             `).join('');
         }
-
+        
         function renderAttendanceFollowUpPanel() {
             const container = DOMElements.attendanceFollowUpPanel;
             if (!container) return;
@@ -2758,51 +3425,6 @@
             }
 
             container.innerHTML = legendHTML + contentHTML;
-        }
-
-        function updateAdminDashboard() {
-            renderAdminKPIs();
-        }
-
-        function updateFollowUpPage() {
-            const servantAttendanceSummary = {};
-            allServantsCache.forEach(s => servantAttendanceSummary[s.id] = { attended: 0, possible: 0, name: s.name, service: s.serviceName });
-            
-            const lastThreeMonths = new Date();
-            lastThreeMonths.setMonth(lastThreeMonths.getMonth() - 3);
-            
-            allAttendanceCache.filter(rec => new Date(rec.date) >= lastThreeMonths).forEach(item => {
-                activities.forEach(act => {
-                    if(item[act.key] && Array.isArray(item[act.key].attendees)) {
-                        const presentIds = new Set(item[act.key].attendees);
-                        const serviceServants = allServantsCache.filter(s => s.serviceName === item.serviceName);
-                        serviceServants.forEach(servant => {
-                            if (servantAttendanceSummary[servant.id]) {
-                                servantAttendanceSummary[servant.id].possible++;
-                                if(presentIds.has(servant.id)) servantAttendanceSummary[servant.id].attended++;
-                            }
-                        });
-                    }
-                });
-            });
-
-            renderAttendanceFollowUpPanel();
-            renderFollowUpPanel(servantAttendanceSummary);
-            renderBirthdaysPanel();
-        }
-        
-        function createKpiCard(icon, title, value, subtext, bgColor, textColor) {
-            return `
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex items-center gap-4">
-                    <div class="${bgColor} p-4 rounded-full flex-shrink-0">
-                        <i class="fas fa-${icon} ${textColor} text-2xl w-8 h-8 text-center leading-8"></i>
-                    </div>
-                    <div>
-                        <p class="text-gray-500 dark:text-gray-400 font-bold">${title}</p>
-                        <p class="text-2xl font-bold truncate" title="${value}">${value}</p>
-                        <div class="text-gray-500 dark:text-gray-400 text-sm">${subtext}</div>
-                    </div>
-                </div>`;
         }
         
         function showUnifiedProfile(servantId) {
@@ -3005,145 +3627,350 @@
             });
         }
         
-        // --- [FIXED] ACTIVITY ANALYSIS PAGE FUNCTIONS ---
-
-        function initializeActivityAnalysisPage() {
-            if (!isGeneralSecretaryMode) return;
-            DOMElements.analysisResultContainer.innerHTML = '<p class="text-gray-500 text-center p-4">الرجاء استخدام الفلاتر أعلاه لإنشاء تقرير.</p>';
-            DOMElements.exportAnalysisBtnContainer.classList.add('hidden-view');
-        }
-
-        async function generateAbsenceAnalysis() {
-            showLoading(true);
-            
-            const selectedService = DOMElements.analysisServiceFilter.value;
-            const selectedYear = DOMElements.analysisYearFilter.value;
-            const selectedMonths = Array.from(DOMElements.analysisMonthCheckboxes.querySelectorAll('input:checked')).map(cb => parseInt(cb.value));
-            const isPercentageMode = DOMElements.analysisModeToggle.checked;
-
-            if (selectedMonths.length === 0) {
-                showMessage('الرجاء اختيار شهر واحد على الأقل.', true);
-                showLoading(false);
-                return;
-            }
-
-            let sourceServants = allServantsCache;
-            if (selectedService !== 'all') {
-                sourceServants = allServantsCache.filter(s => s.serviceName === selectedService);
-            }
-
-            const absenceData = {};
-            sourceServants.forEach(s => {
-                absenceData[s.id] = { name: s.name, serviceName: s.serviceName, absences: 0, totalMeetings: 0 };
-            });
-
-            const filteredAttendance = allAttendanceCache.filter(rec => {
-                const recDate = new Date(rec.date);
-                const recYear = recDate.getFullYear();
-                const recMonth = recDate.getMonth() + 1;
-                
-                const serviceMatch = (selectedService === 'all' || rec.serviceName === selectedService);
-                const yearMatch = recYear == selectedYear;
-                const monthMatch = selectedMonths.includes(recMonth);
-
-                return serviceMatch && yearMatch && monthMatch;
-            });
-
-            filteredAttendance.forEach(day => {
-                const serviceServantsOnDate = sourceServants.filter(s => s.serviceName === day.serviceName);
-                
-                const activityData = day.service; // Analyze absence from the main 'service' activity
-                if (activityData && (activityData.note === null || activityData.note === undefined)) {
-                    const attendees = new Set(activityData.attendees || []);
-                    serviceServantsOnDate.forEach(servant => {
-                        if (absenceData[servant.id]) {
-                            absenceData[servant.id].totalMeetings++;
-                            if (!attendees.has(servant.id)) {
-                                absenceData[servant.id].absences++;
-                            }
-                        }
-                    });
+        // --- EVENT LISTENERS INITIALIZATION ---
+        function initializeEventListeners() {
+            // Main navigation
+            DOMElements.loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                DOMElements.errorMessage.textContent = '';
+                const isAdminLogin = currentServiceName === 'الامين العام';
+                isGeneralSecretaryMode = false;
+                if (isAdminLogin && DOMElements.codeInput.value === ADMIN_CODE) {
+                    isGeneralSecretaryMode = true;
+                    closeModal(DOMElements.loginModal);
+                    DOMElements.codeInput.value = '';
+                    await showDashboard();
+                } else if (!isAdminLogin && DOMElements.codeInput.value === CORRECT_CODE) {
+                    closeModal(DOMElements.loginModal);
+                    DOMElements.codeInput.value = '';
+                    await showDashboard();
+                } else {
+                    DOMElements.errorMessage.textContent = 'الكود غير صحيح. حاول مرة أخرى.';
                 }
             });
 
-            const results = Object.values(absenceData)
-                .map(data => ({
-                    ...data,
-                    value: isPercentageMode 
-                        ? (data.totalMeetings > 0 ? ((data.absences / data.totalMeetings) * 100) : 0)
-                        : data.absences
-                }))
-                .filter(data => data.value > 0)
-                .sort((a, b) => b.value - a.value);
+            DOMElements.sidebar.addEventListener('click', (e) => {
+                const link = e.target.closest('.sidebar-link');
+                if (link) { e.preventDefault(); switchPage(link.dataset.page); }
+            });
+            
+            DOMElements.logoutBtn.addEventListener('click', returnToMainMenu);
+            DOMElements.backToServicesBtn.addEventListener('click', returnToMainMenu);
+            
+            DOMElements.servicesGrid.addEventListener('click', (e) => {
+                const card = e.target.closest('.service-card');
+                if (card) {
+                    currentServiceName = card.dataset.serviceName;
+                    document.getElementById('modalTitle').textContent = `الدخول إلى ${currentServiceName}`;
+                    openModal(DOMElements.loginModal);
+                    setTimeout(() => DOMElements.codeInput.focus(), 100);
+                }
+            });
+            
+            document.querySelectorAll('.close-modal-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => closeModal(e.target.closest('.modal-backdrop')));
+            });
 
-            renderAbsenceAnalysis(results, isPercentageMode);
-            showLoading(false);
-        }
+            // Home Page Listeners
+            DOMElements.backupBtn.addEventListener('click', backupData);
+            DOMElements.restoreBtn.addEventListener('click', restoreData);
+            DOMElements.quickAddServant.addEventListener('click', () => {
+                 DOMElements.manualEntryForm.reset();
+                DOMElements.manualEntryForm.querySelector('#servantId').value = '';
+                DOMElements.manualEntryModalTitle.textContent = 'إضافة خادم جديد';
+                DOMElements.imagePreview.classList.add('hidden');
+                DOMElements.imagePreview.src = '';
+                openModal(DOMElements.manualEntryModal);
+            });
+            DOMElements.quickGoToAttendance.addEventListener('click', () => switchPage('attendancePage'));
+            DOMElements.adminSearchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase().trim();
+                const filteredServants = allServantsCache.filter(servant => 
+                    (servant.name && servant.name.toLowerCase().includes(searchTerm)) ||
+                    (servant.mobile && String(servant.mobile).includes(searchTerm))
+                );
+                renderAdminServantsTable(filteredServants);
+            });
+            DOMElements.addAnnouncementBtn.addEventListener('click', addAnnouncement);
+            DOMElements.adminServantsTableBody.addEventListener('click', (e) => {
+                if(e.target.tagName === 'A' && e.target.dataset.servantId) {
+                    e.preventDefault();
+                    showUnifiedProfile(e.target.dataset.servantId);
+                }
+            });
+            DOMElements.totalServantsCard.addEventListener('click', () => switchPage('servantsPage'));
+            DOMElements.lastFridayStatusContainer.addEventListener('click', (e) => {
+                const card = e.target.closest('.activity-status-card');
+                if (card) {
+                    const activityKey = card.dataset.activityKey;
+                    showActivityAttendees(activityKey);
+                }
+            });
+            DOMElements.sendNoteToAdminBtn.addEventListener('click', sendNoteToAdmin);
+            DOMElements.incomingNotesContainer.addEventListener('click', (e) => {
+                const deleteBtn = e.target.closest('.delete-note-btn');
+                if(deleteBtn) {
+                    deleteNote(deleteBtn.dataset.id);
+                }
+            });
+            
+            DOMElements.sentNotesHistory.addEventListener('click', (e) => {
+                const deleteBtn = e.target.closest('.delete-sent-note-btn');
+                if(deleteBtn) {
+                    deleteSentNote(deleteBtn.dataset.id);
+                }
+            });
 
-        function renderAbsenceAnalysis(results, isPercentageMode) {
-            const container = DOMElements.analysisResultContainer;
-            container.innerHTML = '';
+            DOMElements.loadMoreAnnouncementsBtn.addEventListener('click', loadMoreAnnouncements);
 
-            if (results.length === 0) {
-                container.innerHTML = '<div class="text-center p-8 text-gray-500 dark:text-gray-400"><i class="fas fa-info-circle text-4xl mb-3"></i><p class="font-semibold">لا يوجد غياب مسجل حسب الفلاتر المختارة.</p></div>';
-                DOMElements.exportAnalysisBtnContainer.classList.add('hidden-view');
-                return;
+
+            // Servants Page Listeners
+            DOMElements.searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase().trim();
+                const filteredServants = servantsCache.filter(servant => 
+                    (servant.name && servant.name.toLowerCase().includes(searchTerm)) ||
+                    (servant.mobile && String(servant.mobile).includes(searchTerm))
+                );
+                renderServantsTable(filteredServants);
+            });
+            DOMElements.servantsActions.querySelector('#addManualBtn').addEventListener('click', () => {
+                DOMElements.manualEntryForm.reset();
+                DOMElements.manualEntryForm.querySelector('#servantId').value = '';
+                DOMElements.manualEntryModalTitle.textContent = 'إضافة خادم جديد';
+                DOMElements.imagePreview.classList.add('hidden');
+                DOMElements.imagePreview.src = '';
+                openModal(DOMElements.manualEntryModal);
+            });
+            DOMElements.servantsActions.querySelector('#importExcelBtn').addEventListener('click', () => openModal(DOMElements.importModal));
+            DOMElements.manualEntryForm.addEventListener('submit', handleServantFormSubmit);
+            DOMElements.importForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const file = DOMElements.importForm.querySelector('#excelFile').files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = async (event) => {
+                    try {
+                        showLoading(true);
+                        const data = new Uint8Array(event.target.result);
+                        const workbook = window.XLSX.read(data, { type: 'array' });
+                        const firstSheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[firstSheetName];
+                        const json = window.XLSX.utils.sheet_to_json(worksheet, { 
+                            header: ['id', 'image', 'name', 'nationalId', 'mobile', 'currentService', 'address', 'dob', 'qualification', 'job', 'confessionFather'],
+                            range: 4 
+                        });
+                        
+                        let importedCount = 0;
+                        for (const servant of json) {
+                            if (!servant.name) continue;
+                            if (servant.dob && !isNaN(servant.dob)) {
+                                const dobNumber = Number(servant.dob);
+                                if (dobNumber > 1) {
+                                    const excelDate = new Date((dobNumber - 25569) * 86400 * 1000);
+                                    if (!isNaN(excelDate.getTime())) {
+                                        servant.dob = excelDate.toISOString().split('T')[0];
+                                    } else {
+                                        servant.dob = null;
+                                    }
+                                }
+                            }
+                            await addServant(servant);
+                            importedCount++;
+                        }
+                        closeModal(DOMElements.importModal);
+                        DOMElements.importForm.reset();
+                        showMessage(`تم استيراد ${importedCount} خادم بنجاح.`);
+                    } catch (err) {
+                        showMessage('حدث خطأ أثناء قراءة الملف.', true);
+                        console.error(err);
+                    } finally {
+                        showLoading(false);
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            });
+            DOMElements.servantsTableBody.addEventListener('click', (e) => {
+                const editBtn = e.target.closest('.edit-btn');
+                const deleteBtn = e.target.closest('.delete-btn');
+                if (editBtn) handleEditClick(editBtn.dataset.id);
+                if (deleteBtn) deleteServant(deleteBtn.dataset.id);
+            });
+
+            DOMElements.servantImageFile.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            const MAX_WIDTH = 300;
+                            const MAX_HEIGHT = 300;
+                            let width = img.width;
+                            let height = img.height;
+
+                            if (width > height) {
+                                if (width > MAX_WIDTH) {
+                                    height *= MAX_WIDTH / width;
+                                    width = MAX_WIDTH;
+                                }
+                            } else {
+                                if (height > MAX_HEIGHT) {
+                                    width *= MAX_HEIGHT / height;
+                                    height = MAX_HEIGHT;
+                                }
+                            }
+                            canvas.width = width;
+                            canvas.height = height;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, width, height);
+                            
+                            const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                            
+                            DOMElements.imagePreview.src = dataUrl;
+                            DOMElements.imagePreview.classList.remove('hidden');
+                        }
+                        img.src = event.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+
+            // Attendance Page Listeners
+            DOMElements.yearSelector.addEventListener('change', async () => {
+                const year = DOMElements.yearSelector.value;
+                DOMElements.monthSelector.disabled = true;
+                DOMElements.fridaysGrid.innerHTML = '';
+                DOMElements.activityButtons.classList.add('hidden-view');
+                DOMElements.attendanceListContainer.classList.add('hidden-view');
+                if (year) {
+                    showLoading(true);
+                    await loadAttendanceForYear(year);
+                    showLoading(false);
+                    populateMonths(year);
+                } else {
+                    DOMElements.monthSelector.innerHTML = '<option value="">اختر شهر</option>';
+                }
+            });
+
+            DOMElements.monthSelector.addEventListener('change', async () => {
+                const year = parseInt(DOMElements.yearSelector.value);
+                const month = parseInt(DOMElements.monthSelector.value);
+                if (!isNaN(year) && !isNaN(month) && month >= 0) {
+                    populateFridaysGrid(year, month);
+                } else {
+                    DOMElements.fridaysGrid.innerHTML = '';
+                }
+                DOMElements.activityButtons.classList.add('hidden-view');
+                DOMElements.attendanceListContainer.classList.add('hidden-view');
+            });
+
+            DOMElements.fridaysGrid.addEventListener('click', (e) => {
+                const button = e.target.closest('.friday-btn');
+                if (button) {
+                    document.querySelectorAll('.friday-btn').forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    selectedFriday = button.dataset.date;
+                    updateActivityButtonsStatus(selectedFriday);
+                    DOMElements.attendanceListContainer.classList.add('hidden-view');
+                }
+            });
+
+            DOMElements.activityButtons.addEventListener('click', (e) => {
+                const button = e.target.closest('.activity-btn');
+                if (button) {
+                    const activity = button.dataset.activity;
+                    if (selectedFriday) {
+                        showActivityChecklist(activity, selectedFriday);
+                    } else {
+                        showMessage("الرجاء اختيار يوم الجمعة أولاً.", true);
+                    }
+                }
+            });
+            
+            DOMElements.saveActivityAttendanceBtn.addEventListener('click', saveActivityAttendance);
+
+
+           // Calendar Page Listeners
+            DOMElements.calendarYearSelector.addEventListener('change', () => {
+                const year = parseInt(DOMElements.calendarYearSelector.value);
+                const month = parseInt(DOMElements.calendarMonthSelector.value);
+                if(!isNaN(year) && !isNaN(month)) renderCalendar(year, month);
+            });
+            DOMElements.calendarMonthSelector.addEventListener('change', () => {
+                const year = parseInt(DOMElements.calendarYearSelector.value);
+                const month = parseInt(DOMElements.calendarMonthSelector.value);
+                if(!isNaN(year) && !isNaN(month)) renderCalendar(year, month);
+            });
+            // الكود الجديد
+            DOMElements.calendarContent.addEventListener('click', (e) => {
+            const dayCell = e.target.closest('td[data-date]');
+            if (dayCell) {
+             if (isGeneralSecretaryMode) {
+            // إذا كان المستخدم هو الأمين العام، قم دائمًا بعرض نافذة الملخص
+            showAggregatedEventsModal(dayCell.dataset.date);
+             } else {
+            // إذا كان المستخدم أمين خدمة عادي، قم بعرض نافذة التعديل
+            openEventModal(dayCell.dataset.date);
+             }
+             }
+                });
+            DOMElements.calendarEventForm.addEventListener('submit', handleEventFormSubmit);
+            DOMElements.deleteEventBtn.addEventListener('click', deleteCalendarEvent);
+             // Admin-specific listener for calendar service selection
+            if (DOMElements.calendarServiceSelector) {
+                DOMElements.calendarServiceSelector.addEventListener('change', () => {
+                    const selectedService = DOMElements.calendarServiceSelector.value;
+                    listenForCalendarEvents(selectedService || null);
+                });
             }
-            
-            const tableContainer = document.createElement('div');
-            tableContainer.className = "overflow-x-auto";
 
-            const table = document.createElement('table');
-            table.className = 'w-full text-right';
-            let tableHTML = `
-                <thead class="bg-gray-100 dark:bg-gray-700">
-                    <tr>
-                        <th class="p-4 font-bold text-sm">الاسم</th>
-                        <th class="p-4 font-bold text-sm">الخدمة</th>
-                        <th class="p-4 font-bold text-sm text-center">${isPercentageMode ? 'نسبة الغياب' : 'عدد مرات الغياب'}</th>
-                        <th class="p-4 font-bold text-sm text-center">التفاصيل</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-            `;
 
-            results.forEach(servant => {
-                const valueDisplay = isPercentageMode ? `${servant.value.toFixed(1)}%` : servant.value;
-                tableHTML += `
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                        <td class="p-4 font-semibold">${servant.name}</td>
-                        <td class="p-4 text-gray-600 dark:text-gray-300">${servant.serviceName}</td>
-                        <td class="p-4 text-center font-bold text-lg ${getPercentageTextColor(100-servant.value)}">${valueDisplay}</td>
-                        <td class="p-4 text-center text-sm text-gray-500">(${servant.absences} غياب من ${servant.totalMeetings} اجتماع)</td>
-                    </tr>
-                `;
+            // Reports Page Listeners
+            document.getElementById('reportTabs').addEventListener('click', (e) => {
+                const tab = e.target.closest('.report-tab');
+                if (tab) {
+                    document.querySelectorAll('.report-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    currentReportType = tab.dataset.reportType;
+
+                    const isComparison = currentReportType === 'comparison';
+                    DOMElements.standardReportsContainer.classList.toggle('hidden-view', isComparison);
+                    DOMElements.comparisonReportContainer.classList.toggle('hidden-view', !isComparison);
+                    
+                    if (!isComparison) {
+                        DOMElements.reportOutput.classList.add('hidden-view');
+                        DOMElements.servantSelectorContainer.classList.toggle('hidden-view', currentReportType !== 'individual');
+                    }
+                }
             });
-
-            tableHTML += '</tbody>';
-            table.innerHTML = tableHTML;
-            tableContainer.appendChild(table);
-            container.appendChild(tableContainer);
+            DOMElements.reportServiceSelector.addEventListener('change', () => {
+                const selectedService = DOMElements.reportServiceSelector.value;
+                const filteredServants = selectedService === 'all'
+                    ? allServantsCache 
+                    : allServantsCache.filter(s => s.serviceName === selectedService);
+                populateReportServantSelector(filteredServants);
+            });
+            DOMElements.generateReportBtn.addEventListener('click', triggerReportGeneration);
+            DOMElements.generateComparisonBtn.addEventListener('click', generateComparisonReport);
+            DOMElements.exportPngBtn.addEventListener('click', exportAsImage);
+            DOMElements.exportPdfBtn.addEventListener('click', exportAsPdf);
             
-            DOMElements.exportAnalysisBtnContainer.classList.remove('hidden-view');
-        }
+            // Theme Toggle Listener
+            DOMElements.themeCheckbox.addEventListener('change', toggleTheme);
 
-        async function exportAnalysisAsImage() {
-            const container = document.getElementById('activityAnalysisPage').querySelector('.bg-white');
-            if(!container) return;
-            showMessage('جاري تجهيز الصورة للتصدير...');
-            html2canvas(container, { 
-                backgroundColor: document.body.classList.contains('dark') ? '#1f2937' : '#ffffff',
-                scale: 2,
-                useCORS: true 
-            }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = `absence-analysis-${new Date().toISOString().slice(0,10)}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
+            // Mobile Sidebar Listeners
+            DOMElements.hamburgerBtn.addEventListener('click', () => {
+                DOMElements.sidebar.classList.remove('translate-x-full');
+                DOMElements.sidebarOverlay.classList.remove('hidden');
+            });68
+            DOMElements.sidebarOverlay.addEventListener('click', () => {
+                DOMElements.sidebar.classList.add('translate-x-full');
+                DOMElements.sidebarOverlay.classList.add('hidden');
             });
         }
-
-
+        
         // --- APP INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', () => {
             DOMElements = {
@@ -3180,6 +4007,19 @@
                 attendanceListTitle: document.getElementById('attendanceListTitle'),
                 servantsChecklist: document.getElementById('servantsChecklist'),
                 saveActivityAttendanceBtn: document.getElementById('saveActivityAttendanceBtn'),
+                calendarYearSelector: document.getElementById('calendarYearSelector'),
+                calendarMonthSelector: document.getElementById('calendarMonthSelector'),
+                calendarContent: document.getElementById('calendarContent'),
+                calendarEventModal: document.getElementById('calendarEventModal'),
+                calendarEventForm: document.getElementById('calendarEventForm'),
+                eventModalDate: document.getElementById('eventModalDate'),
+                eventDate: document.getElementById('eventDate'),
+                eventTypeSelector: document.getElementById('eventTypeSelector'),
+                eventDetailsInput: document.getElementById('eventDetailsInput'),
+                saveEventBtn: document.getElementById('saveEventBtn'),
+                deleteEventBtn: document.getElementById('deleteEventBtn'),
+                calendarServiceSelector: document.getElementById('calendarServiceSelector'),
+                calendarServiceFilterContainer: document.getElementById('calendarServiceFilterContainer'),
                 searchInput: document.getElementById('searchInput'),
                 reportContent: document.getElementById('reportContent'),
                 reportOutput: document.getElementById('reportOutput'),
@@ -3227,26 +4067,41 @@
                 followUpPanel: document.getElementById('followUpPanel'),
                 birthdaysPanel: document.getElementById('birthdaysPanel'),
                 attendanceFollowUpPanel: document.getElementById('attendanceFollowUpPanel'),
-                activityAnalysisLink: document.getElementById('activityAnalysisLink'),
                 followUpLink: document.getElementById('followUpLink'),
-                analysisServiceFilter: document.getElementById('analysisServiceFilter'),
-                analysisYearFilter: document.getElementById('analysisYearFilter'),
-                analysisMonthCheckboxes: document.getElementById('analysisMonthCheckboxes'),
-                analysisModeToggle: document.getElementById('analysisModeToggle'),
-                analysisModeLabel: document.getElementById('analysisModeLabel'),
-                generateAnalysisBtn: document.getElementById('generateAnalysisBtn'),
-                analysisResultContainer: document.getElementById('analysisResultContainer'),
-                exportAnalysisBtnContainer: document.getElementById('exportAnalysisBtnContainer'),
-                exportAnalysisBtn: document.getElementById('exportAnalysisBtn'),
                 themeCheckbox: document.getElementById('theme-checkbox'),
                 totalServantsCard: document.getElementById('totalServantsCard'),
                 activityAttendeesModal: document.getElementById('activityAttendeesModal'),
                 activityAttendeesModalTitle: document.getElementById('activityAttendeesModalTitle'),
                 activityAttendeesModalBody: document.getElementById('activityAttendeesModalBody'),
+                aggregatedEventsModal: document.getElementById('aggregatedEventsModal'),
+                aggregatedEventsModalTitle: document.getElementById('aggregatedEventsModalTitle'),
+                aggregatedEventsModalBody: document.getElementById('aggregatedEventsModalBody'),
+                noteToAdminInput: document.getElementById('noteToAdminInput'),
+                sendNoteToAdminBtn: document.getElementById('sendNoteToAdminBtn'),
+                sentNotesHistory: document.getElementById('sentNotesHistory'),
+                incomingNotesContainer: document.getElementById('incomingNotesContainer'),
+                correspondencePage: document.getElementById('correspondencePage'),
+                correspondenceCenterPage: document.getElementById('correspondenceCenterPage'),
+                announcementTarget: document.getElementById('announcementTarget'),
+                correspondenceLink: document.getElementById('correspondenceLink'),
+                correspondenceCenterLink: document.getElementById('correspondenceCenterLink'),
+                correspondenceBadge: document.getElementById('correspondenceBadge'),
+                announcementsBoardPage: document.getElementById('announcementsBoardPage'),
+                announcementsBoardLink: document.getElementById('announcementsBoardLink'),
+                serviceAnnouncementsPage: document.getElementById('serviceAnnouncementsPage'),
+                serviceAnnouncementsLink: document.getElementById('serviceAnnouncementsLink'),
+                bulletinBoard: document.getElementById('bulletinBoard'),
+                bulletinBoardTitle: document.getElementById('bulletinBoardTitle'),
+                loadMoreAnnouncementsContainer: document.getElementById('loadMoreAnnouncementsContainer'),
+                loadMoreAnnouncementsBtn: document.getElementById('loadMoreAnnouncementsBtn'),
+                 serviceAnnouncementsBadge: document.getElementById('serviceAnnouncementsBadge'),
+
             };
 
             initializeFirebase();
             populateServices();
+            updateServiceCardBadges();
+            listenForUnreadNotesForBadge(); // Start listening for admin notes immediately
             initializeEventListeners();
         });
 
